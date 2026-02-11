@@ -12,7 +12,7 @@ services:
       - bersn_pgdata:/var/lib/postgresql/data
       - ../../database/migrations/postgres:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
       timeout: 3s
       retries: 30
@@ -23,10 +23,20 @@ services:
     ports:
       - "${REDIS_PORT}:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 5s
       timeout: 3s
       retries: 30
+
+  calc:
+    build:
+      context: ../../services/calc
+    container_name: bersn_calc
+    ports:
+      - "${CALC_PORT}:8000"
+    depends_on:
+      - postgres
+      - redis
 
 volumes:
   bersn_pgdata:
