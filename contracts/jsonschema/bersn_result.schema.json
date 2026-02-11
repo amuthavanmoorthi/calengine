@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bersn_result.schema.json",
+  "title": "BERSn Calculation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "calc_run_id",
+    "branch_type",
+    "formula_version",
+    "score",
+    "grade",
+    "outputs"
+  ],
+  "properties": {
+    "calc_run_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Unique identifier of this calculation run."
+    },
+    "branch_type": {
+      "type": "string",
+      "enum": ["WITHOUT_HOT_WATER", "WITH_HOT_WATER"]
+    },
+    "formula_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "score": {
+      "type": "number",
+      "description": "Final BERSn score computed from the official formula."
+    },
+    "grade": {
+      "type": "string",
+      "description": "BERSn grade/level derived from score thresholds."
+    },
+    "outputs": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Primary calculated outputs (EUI, CEI, reference values, etc.)."
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "intermediates": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Intermediate values for explainability and debugging."
+    },
+    "trace": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Audit trace: input hash, constants version, equation/table refs, code commit."
+    }
+  }
+}

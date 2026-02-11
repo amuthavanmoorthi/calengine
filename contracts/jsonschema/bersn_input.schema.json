@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bersn_input.schema.json",
+  "title": "BERSn Calculation Input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["branch_type", "formula_version", "inputs"],
+  "properties": {
+    "branch_type": {
+      "type": "string",
+      "enum": ["WITHOUT_HOT_WATER", "WITH_HOT_WATER"],
+      "description": "BERSn calculation branch as defined in the technical manual."
+    },
+    "formula_version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Exact BERSn formula/tables version used (e.g. BERSn-2024-v1)."
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["building"],
+      "properties": {
+        "building": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "climate_zone"],
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "climate_zone": {
+              "type": "string",
+              "description": "Climate or region classification used by BERSn tables."
+            }
+          }
+        },
+        "envelope": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Building envelope parameters (U-values, areas, etc.)."
+        },
+        "hvac": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "HVAC system parameters (efficiency, capacity, control type)."
+        },
+        "lighting": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Lighting parameters (LPD, control factors, schedules)."
+        },
+        "hot_water": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Only applicable when branch_type = WITH_HOT_WATER."
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional: document page refs, user notes, source annotations."
+    }
+  }
+}
