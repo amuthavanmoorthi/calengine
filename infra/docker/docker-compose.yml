@@ -37,6 +37,24 @@ services:
     depends_on:
       - postgres
       - redis
+  api:
+    build:
+      context: ../../services/api
+    container_name: bersn_api
+    ports:
+      - "${API_PORT}:8081"
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      CALC_URL: http://bersn_calc:8000
+      API_PORT: 8081
+    depends_on:
+      - postgres
+      - redis
+      - calc
 
 volumes:
   bersn_pgdata:
