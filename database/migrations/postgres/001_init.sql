@@ -27,6 +27,14 @@ CREATE TABLE IF NOT EXISTS calc_results (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS calc_step_results (
+  calc_run_id UUID NOT NULL REFERENCES calc_runs(id),
+  step_name TEXT NOT NULL,
+  result_json JSONB NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (calc_run_id, step_name)
+);
+
 -- Helpful indexes (audit + query speed)
 CREATE INDEX IF NOT EXISTS idx_bersn_input_versions_project_id ON bersn_input_versions(project_id);
 CREATE INDEX IF NOT EXISTS idx_calc_runs_input_version_id ON calc_runs(input_version_id);

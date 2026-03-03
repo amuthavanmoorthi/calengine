@@ -1,0 +1,37 @@
+{
+  "version": "BERS_2024",
+  "source": {
+    "document": "Technical.pdf",
+    "table": "Table 3.4",
+    "title": "BERSn 能效等級 EUI 基準值計算法與分級標示法"
+  },
+  "notes": [
+    "Table 3.4 is formula-driven and depends on EUIn, EUIg, EUImax calculated per project.",
+    "These are threshold formulas, not fixed numeric constants."
+  ],
+  "score_bands": [
+    { "grade": "1+", "score_min_inclusive": 90, "score_max_inclusive": 100 },
+    { "grade": "1",  "score_min_inclusive": 80, "score_max_exclusive": 90 },
+    { "grade": "2",  "score_min_inclusive": 70, "score_max_exclusive": 80 },
+    { "grade": "3",  "score_min_inclusive": 60, "score_max_exclusive": 70 },
+    { "grade": "4",  "score_min_inclusive": 50, "score_max_exclusive": 60 },
+    { "grade": "5",  "score_min_inclusive": 40, "score_max_exclusive": 50 },
+    { "grade": "6",  "score_min_inclusive": 20, "score_max_exclusive": 40 },
+    { "grade": "7",  "score_min_inclusive": 0,  "score_max_exclusive": 20 }
+  ],
+  "eui_threshold_formulas": {
+    "1+": "EUI <= EUIn",
+    "1":  "EUI <= EUIn + (10/40) * (EUIg - EUIn)",
+    "2":  "EUI <= EUIn + (20/40) * (EUIg - EUIn)",
+    "3":  "EUI <= EUIn + (30/40) * (EUIg - EUIn)",
+    "4":  "EUI <= EUIg",
+    "5":  "EUI <= EUIg + (10/50) * (EUImax - EUIg)",
+    "6":  "EUI <= EUIg + (30/50) * (EUImax - EUIg)",
+    "7":  "EUI > EUIg + (30/50) * (EUImax - EUIg)"
+  },
+  "display_threshold_formula_order": ["1+", "1", "2", "3", "4", "5", "6", "7"],
+  "rounding": {
+    "calculation_precision": "1 decimal during calculation process (per text)",
+    "score_display": "round to nearest integer"
+  }
+}

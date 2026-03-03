@@ -1,0 +1,265 @@
+{
+  "version": "BERS_2024_v1.0",
+  "source": "Project internal mapping for BERSn 3-1 classification (Appendix 1 Table A + Table 3.2 + hot-water category)",
+  "notes": [
+    "Use internal_type_key in API payload segments to resolve Appendix 1 baselines and Table 3.2 Es/YOHj.",
+    "Keys are project-internal and can be renamed later, but table_3_2_label and appendix1_code must stay aligned with spec data files."
+  ],
+  "schema": {
+    "<internal_type_key>": {
+      "appendix1_code": "string",
+      "appendix1_label": "string|null",
+      "table_3_2_label": "string",
+      "supports_intermittent_ac": "boolean|null",
+      "hotwater_branch_category": "null|hotel|long_term_care_or_hospital|dormitory|fitness_leisure",
+      "aliases": ["optional ui labels / aliases"],
+      "notes": "string|null"
+    }
+  },
+  "maps": {
+    "A1_ASSEMBLY_PERFORMANCE": {
+      "appendix1_code": "A1",
+      "appendix1_label": "A1",
+      "table_3_2_label": "A-1 之集會表演",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["A-1 之集會表演"],
+      "notes": null
+    },
+    "A1_SPORTS_SPECIAL_VENUE": {
+      "appendix1_code": "A1",
+      "appendix1_label": "A1",
+      "table_3_2_label": "A-1 之體育專用場館",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["A-1 之體育專用場館"],
+      "notes": null
+    },
+    "A2_INTERNATIONAL_TERMINAL": {
+      "appendix1_code": "A2",
+      "appendix1_label": "A2",
+      "table_3_2_label": "A-2 之國際航站",
+      "supports_intermittent_ac": true,
+      "hotwater_branch_category": null,
+      "aliases": ["A-2 之國際航站"],
+      "notes": null
+    },
+    "A2_STATION_PORT_DOMESTIC_TERMINAL": {
+      "appendix1_code": "A2",
+      "appendix1_label": "A2",
+      "table_3_2_label": "A-2 車站、船站、國內航站",
+      "supports_intermittent_ac": true,
+      "hotwater_branch_category": null,
+      "aliases": ["A-2 車站、船站、國內航站"],
+      "notes": null
+    },
+    "B1_ENTERTAINMENT": {
+      "appendix1_code": "B1",
+      "appendix1_label": "B1",
+      "table_3_2_label": "B-1 娛樂場所",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["B-1 娛樂場所"],
+      "notes": null
+    },
+    "B2_DEPARTMENT_STORE": {
+      "appendix1_code": "B2",
+      "appendix1_label": "B2",
+      "table_3_2_label": "B-2 商場百貨",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["B-2 商場百貨"],
+      "notes": null
+    },
+    "B3_RESTAURANT": {
+      "appendix1_code": null,
+      "appendix1_label": "B3",
+      "table_3_2_label": "B-3 餐飲場所",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["B-3 餐飲場所"],
+      "notes": "Appendix 1 2024 code crosswalk required (old Table 3.2 label vs revised Table A code)."
+    },
+    "B4_HOTEL": {
+      "appendix1_code": null,
+      "appendix1_label": "B4",
+      "table_3_2_label": "B-4 旅館",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": "hotel",
+      "aliases": ["B-4 旅館"],
+      "notes": "Appendix 1 2024 code crosswalk required; central hot-water branch may apply."
+    },
+    "C2_FACTORY_CLEAN_PRODUCTION": {
+      "appendix1_code": "C2",
+      "appendix1_label": "C2",
+      "table_3_2_label": "C-2 之有清潔生產之工廠",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["C-2 之有清潔生產之工廠"],
+      "notes": null
+    },
+    "C2_FACTORY_GENERAL_PRODUCTION": {
+      "appendix1_code": "C2",
+      "appendix1_label": "C2",
+      "table_3_2_label": "C-2 之一般生產之工廠",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["C-2 之一般生產之工廠"],
+      "notes": null
+    },
+    "D1_FITNESS_LEISURE": {
+      "appendix1_code": "D1",
+      "appendix1_label": "D1",
+      "table_3_2_label": "D-1 之健身休閒",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": "fitness_leisure",
+      "aliases": ["D-1 之健身休閒"],
+      "notes": "Central hot-water branch may apply for fitness/leisure facilities."
+    },
+    "D1_SPORTS_SPECIAL_VENUE": {
+      "appendix1_code": "D1",
+      "appendix1_label": "D1",
+      "table_3_2_label": "D-1 之體育專用場館",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-1 之體育專用場館"],
+      "notes": null
+    },
+    "D2_EDUCATION_CULTURE": {
+      "appendix1_code": "D2",
+      "appendix1_label": "D2",
+      "table_3_2_label": "D-2 之文教設施",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-2 之文教設施"],
+      "notes": null
+    },
+    "D2_SPECIAL_FUNCTION_VENUE": {
+      "appendix1_code": "D2",
+      "appendix1_label": "D2",
+      "table_3_2_label": "D-2 之特殊功能場館",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-2 之特殊功能場館"],
+      "notes": null
+    },
+    "D3_D4_TEACHING_OFFICE_BUILDING": {
+      "appendix1_code": "D3",
+      "appendix1_label": "D3/D4 mixed category in Table 3.2 row",
+      "table_3_2_label": "D-3&D-4 之教學辦公公樓",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-3&D-4 之教學辦公公樓", "D-3 & D-4 之教學辦公公樓"],
+      "notes": "Select appropriate Appendix 1 code according to your project subtype; default mapping uses D3 for now."
+    },
+    "D3_TYPE_B_CLASSROOM": {
+      "appendix1_code": "D3",
+      "appendix1_label": "D3",
+      "table_3_2_label": "D-3 乙教室",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-3 乙教室"],
+      "notes": null
+    },
+    "D4_TYPE_B_CLASSROOM": {
+      "appendix1_code": "D4",
+      "appendix1_label": "D4",
+      "table_3_2_label": "D-4 乙教室",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-4 乙教室"],
+      "notes": null
+    },
+    "D5_AFTERSCHOOL_CARE": {
+      "appendix1_code": null,
+      "appendix1_label": "D5",
+      "table_3_2_label": "D-5 補教課後照顧機構",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-5 補教課後照顧機構"],
+      "notes": "Appendix 1 2024 code crosswalk required (old Table 3.2 label vs revised Table A code)."
+    },
+    "E_RELIGION_FUNERAL": {
+      "appendix1_code": null,
+      "appendix1_label": "E",
+      "table_3_2_label": "E 宗教殯儀設施",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["E 宗教殯儀設施"],
+      "notes": "Appendix 1 2024 code crosswalk required (likely one of revised E/O codes depending actual subtype)."
+    },
+    "F1_DAYCARE_MEDICAL_CARE": {
+      "appendix1_code": "F1",
+      "appendix1_label": "F1",
+      "table_3_2_label": "F-1 乙醫療照護(日照)",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["F-1 乙醫療照護(日照)"],
+      "notes": null
+    },
+    "F1_HOSPITAL_LONG_TERM_CARE": {
+      "appendix1_code": "F1",
+      "appendix1_label": "F1",
+      "table_3_2_label": "F-1 乙醫療照護(醫院、長照)",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": "long_term_care_or_hospital",
+      "aliases": ["F-1 乙醫療照護(醫院、長照)"],
+      "notes": "Central hot-water branch may apply."
+    },
+    "F2_SMALL_CARE_TRAINING": {
+      "appendix1_code": "F2",
+      "appendix1_label": "F2",
+      "table_3_2_label": "F-2 小型照護訓練機構",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["F-2 小型照護訓練機構"],
+      "notes": null
+    },
+    "F3_CHILD_YOUTH_INSTITUTION": {
+      "appendix1_code": null,
+      "appendix1_label": "F3",
+      "table_3_2_label": "F-3 兒少機構",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["F-3 兒少機構"],
+      "notes": "Appendix 1 2024 code crosswalk required (old Table 3.2 label vs revised Table A code)."
+    },
+    "G1_FINANCE_SECURITIES": {
+      "appendix1_code": "G1",
+      "appendix1_label": "G1",
+      "table_3_2_label": "G-1 金融證券",
+      "supports_intermittent_ac": true,
+      "hotwater_branch_category": null,
+      "aliases": ["G-1 金融證券"],
+      "notes": null
+    },
+    "G2_OFFICE": {
+      "appendix1_code": "G2",
+      "appendix1_label": "G2",
+      "table_3_2_label": "G-2 辦公場所",
+      "supports_intermittent_ac": true,
+      "hotwater_branch_category": null,
+      "aliases": ["G-2 辦公場所"],
+      "notes": null
+    },
+    "G3_OUTPATIENT_RETAIL_SERVICE": {
+      "appendix1_code": null,
+      "appendix1_label": "G3",
+      "table_3_2_label": "G-3 門診零售服務",
+      "supports_intermittent_ac": true,
+      "hotwater_branch_category": null,
+      "aliases": ["G-3 門診零售服務"],
+      "notes": "Appendix 1 2024 code crosswalk required (old Table 3.2 label vs revised Table A code)."
+    },
+    "H1_H2_NON_RESIDENTIAL": {
+      "appendix1_code": "H1",
+      "appendix1_label": "H1/H2 (project-specific subtype selection may be needed)",
+      "table_3_2_label": "H-1 及 H-2(住宅、集合住宅除外)",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": "dormitory",
+      "aliases": ["H-1 及 H-2(住宅、集合住宅除外)"],
+      "notes": "If project is non-residential dormitory use, map to dormitory hot-water branch as applicable."
+    }
+  }
+}
+  

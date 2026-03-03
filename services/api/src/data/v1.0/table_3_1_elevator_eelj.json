@@ -1,0 +1,62 @@
+{
+  "version": "BERS_2024",
+  "source": {
+    "document": "Technical.pdf",
+    "table": "Table 3.1",
+    "title": "電梯耗電量基準 Eelj（kWh/(台 hr)）"
+  },
+  "units": {
+    "eelj": "kWh/(car·hr)",
+    "rated_speed": "m/min",
+    "rated_load": "kg/car"
+  },
+  "rows": [
+    {
+      "floor_band": "2F-6F",
+      "rated_persons_per_car": 15,
+      "rated_load_kg_per_car": 1000,
+      "rated_speed_m_per_min": 60,
+      "eelj_kwh_per_car_hr": 3.49
+    },
+    {
+      "floor_band": "7F-16F",
+      "rated_persons_per_car": 20,
+      "rated_load_kg_per_car": 1350,
+      "rated_speed_m_per_min": 105,
+      "eelj_kwh_per_car_hr": 8.24
+    },
+    {
+      "floor_band": "17F-30F",
+      "rated_persons_per_car": 20,
+      "rated_load_kg_per_car": 1350,
+      "rated_speed_m_per_min": 120,
+      "eelj_kwh_per_car_hr": 9.42
+    },
+    {
+      "floor_band": "31F+",
+      "rated_persons_per_car": 20,
+      "rated_load_kg_per_car": 1350,
+      "rated_speed_m_per_min": 210,
+      "eelj_kwh_per_car_hr": 16.48
+    },
+    {
+      "floor_band": "31F+",
+      "rated_persons_per_car": 20,
+      "rated_load_kg_per_car": 1350,
+      "rated_speed_m_per_min": 300,
+      "eelj_kwh_per_car_hr": 23.55
+    },
+    {
+      "floor_band": "31F+",
+      "rated_persons_per_car": 20,
+      "rated_load_kg_per_car": 1350,
+      "rated_speed_m_per_min": 420,
+      "eelj_kwh_per_car_hr": 32.97
+    }
+  ],
+  "notes": [
+    "30F 以下不依額定人數、額定載重、額定速度讀取數據，只依樓層數讀取 Eelj。",
+    "31F 以上依實際額定速度就近讀取 Eelj。",
+    "若所有電梯服務樓層數均同，j=1，式 3.2 計算一次即可。"
+  ]
+}

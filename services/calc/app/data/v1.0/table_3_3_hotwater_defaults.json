@@ -1,0 +1,77 @@
+{
+  "version": "BERS_2024",
+  "source": {
+    "document": "Technical.pdf",
+    "table": "Table 3.3",
+    "title": "各類中央熱水系統用熱水量建議值"
+  },
+  "units": {
+    "hwi_person_day": "m3/(person·day)",
+    "hwi_hr_m2": "m3/(hr·m2)",
+    "hourly_pool_supply": "m3/hr"
+  },
+  "global_notes": [
+    "淋浴溫度 42℃之熱水需求量=0.056 m3/(人·日)",
+    "淋浴溫度 42℃之熱水需求量=0.070 m3/(人·日)（表頭文字）"
+  ],
+  "rows": [
+    {
+      "building_category": "hotel",
+      "water_use_zone": "旅館客房人數",
+      "npi_definition": "NP1(人)=ΣN人房數量×N人",
+      "daily_or_hourly_hot_water_demand_note": null,
+      "hwi_code": "HW1",
+      "hwi_value": 0.0378,
+      "hwi_unit": "m3/(person·day)",
+      "heat_pump_supply_temperature_c": 55
+    },
+    {
+      "building_category": "long_term_care_or_hospital",
+      "water_use_zone": "長照機構或醫院病房人數",
+      "npi_definition": "NP2(人)=病床數×1人",
+      "daily_or_hourly_hot_water_demand_note": null,
+      "hwi_code": "HW2",
+      "hwi_value": 0.0473,
+      "hwi_unit": "m3/(person·day)",
+      "heat_pump_supply_temperature_c": 55
+    },
+    {
+      "building_category": "dormitory",
+      "water_use_zone": "宿舍",
+      "npi_definition": "NP3(人)=ΣN人房數量×N人",
+      "daily_or_hourly_hot_water_demand_note": "淋浴溫度42℃之熱水需求量=0.050 m3/(人·日)",
+      "hwi_code": "HW3",
+      "hwi_value": 0.0338,
+      "hwi_unit": "m3/(person·day)",
+      "heat_pump_supply_temperature_c": 55
+    },
+    {
+      "building_category": "fitness_leisure",
+      "water_use_zone": "溫水游泳池或溫水SPA",
+      "npi_definition": "無",
+      "daily_or_hourly_hot_water_demand_note": "泳池溫度38℃之逐時供熱水量=泳池體積Vp或SPA池體積Vs×0.01 m3/hr",
+      "hwi_code": null,
+      "hwi_formula_note": "逐時熱泵供40℃熱水量=泳池體積Vp或SPA池體積Vs×0.01 m3/hr",
+      "hwi_unit": "m3/hr",
+      "heat_pump_supply_temperature_c": 40
+    },
+    {
+      "building_category": "fitness_leisure",
+      "water_use_zone": "運動休閒設施盥洗室",
+      "npi_definition": "盥洗室(不含更衣室、廁所)面積 Afw(m2)",
+      "daily_or_hourly_hot_water_demand_note": "淋浴溫度42℃之熱水量=0.015m3/次人×4次人/(間)÷3m2/間=0.02 m3/(hr·m2)",
+      "hwi_code": null,
+      "hwi_value": 0.0135,
+      "hwi_formula_note": "逐時熱泵供55℃熱水量=0.01014m3/次人×4次人/(間)÷3m2/間=0.0135 m3/(hr·m2)",
+      "hwi_unit": "m3/(hr·m2)",
+      "heat_pump_supply_temperature_c": 55
+    }
+  ],
+  "derived_constants_for_engine": {
+    "hpc_a_group_kw_per_m3": 2.08,
+    "hpc_fitness_shower_kw_per_m3": 2.08,
+    "hpc_fitness_pool_spa_kw_per_m3": 1.2,
+    "hot_water_operation_hours_design": 8,
+    "hp_eui_load_factor": 0.7
+  }
+}

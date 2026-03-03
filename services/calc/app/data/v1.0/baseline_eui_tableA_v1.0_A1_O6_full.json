@@ -1,0 +1,902 @@
+{
+  "version": "v1.0",
+  "source": "Appendix 1 Table A (BERS專用建築分類與EUI基準) — extracted from provided Technical Document v1.0, which is based on the 2024-06-01 version of the BERS Technical Document.",
+  "units": "kWh/(m^2·yr)",
+  "schema": {
+    "baseline_eui": {
+      "<building_code>": {
+        "full_year_ac": {
+          "AEUI": "number",
+          "LEUI": "number",
+          "EEUI": "number"
+        },
+        "intermittent_ac": {
+          "AEUI": "number",
+          "LEUI": "number",
+          "EEUI": "number"
+        },
+        "UR": { 
+          "A": "number",
+          "B": "number",
+          "C": "number",
+          "D": "number"
+        }
+      }
+    }
+  },
+  "baseline_eui": {
+    "A1": {
+      "full_year_ac": {
+        "AEUI": 75.6,
+        "LEUI": 45.4,
+        "EEUI": 30.2
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "A2": {
+      "full_year_ac": {
+        "AEUI": 65.2,
+        "LEUI": 39.1,
+        "EEUI": 26.1
+      },
+      "intermittent_ac": {
+        "AEUI": 45.6,
+        "LEUI": 39.1,
+        "EEUI": 26.1
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "B1": {
+      "full_year_ac": {
+        "AEUI": 58.7,
+        "LEUI": 35.2,
+        "EEUI": 23.5
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "B2": {
+      "full_year_ac": {
+        "AEUI": 48.0,
+        "LEUI": 28.2,
+        "EEUI": 18.8
+      },
+      "intermittent_ac": {
+        "AEUI": 33.6,
+        "LEUI": 28.2,
+        "EEUI": 18.8
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "C1": {
+      "full_year_ac": {
+        "AEUI": 52.0,
+        "LEUI": 31.2,
+        "EEUI": 20.8
+      },
+      "intermittent_ac": {
+        "AEUI": 36.4,
+        "LEUI": 31.2,
+        "EEUI": 20.8
+      },
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "C2": {
+      "full_year_ac": {
+        "AEUI": 46.2,
+        "LEUI": 27.7,
+        "EEUI": 18.5
+      },
+      "intermittent_ac": {
+        "AEUI": 32.3,
+        "LEUI": 27.7,
+        "EEUI": 18.5
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "D1": {
+      "full_year_ac": {
+        "AEUI": 158.9,
+        "LEUI": 63.6,
+        "EEUI": 42.4
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "D2": {
+      "full_year_ac": {
+        "AEUI": 108.4,
+        "LEUI": 43.4,
+        "EEUI": 28.9
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "D3": {
+      "full_year_ac": {
+        "AEUI": 94.0,
+        "LEUI": 37.6,
+        "EEUI": 25.1
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "D4": {
+      "full_year_ac": {
+        "AEUI": 70.1,
+        "LEUI": 42.1,
+        "EEUI": 28.0
+      },
+      "intermittent_ac": {
+        "AEUI": 49.1,
+        "LEUI": 42.1,
+        "EEUI": 28.0
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "E1": {
+      "full_year_ac": {
+        "AEUI": 135.2,
+        "LEUI": 54.0,
+        "EEUI": 36.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "E2": {
+      "full_year_ac": {
+        "AEUI": 117.9,
+        "LEUI": 47.2,
+        "EEUI": 31.4
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "E3": {
+      "full_year_ac": {
+        "AEUI": 82.5,
+        "LEUI": 49.1,
+        "EEUI": 29.5
+      },
+      "intermittent_ac": {
+        "AEUI": 57.8,
+        "LEUI": 49.1,
+        "EEUI": 29.5
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "F1": {
+      "full_year_ac": {
+        "AEUI": 71.8,
+        "LEUI": 42.9,
+        "EEUI": 28.7
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "F2": {
+      "full_year_ac": {
+        "AEUI": 50.6,
+        "LEUI": 30.3,
+        "EEUI": 20.2
+      },
+      "intermittent_ac": {
+        "AEUI": 35.4,
+        "LEUI": 30.3,
+        "EEUI": 20.2
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "G1": {
+      "full_year_ac": {
+        "AEUI": 53.1,
+        "LEUI": 24.9,
+        "EEUI": 7.4
+      },
+      "intermittent_ac": {
+        "AEUI": 37.2,
+        "LEUI": 24.9,
+        "EEUI": 7.4
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "G2": {
+      "full_year_ac": {
+        "AEUI": 42.4,
+        "LEUI": 20.0,
+        "EEUI": 6.0
+      },
+      "intermittent_ac": {
+        "AEUI": 30.0,
+        "LEUI": 20.0,
+        "EEUI": 6.0
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "H1": {
+      "full_year_ac": {
+        "AEUI": 70.2,
+        "LEUI": 42.1,
+        "EEUI": 28.1
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "H2": {
+      "full_year_ac": {
+        "AEUI": 64.8,
+        "LEUI": 38.9,
+        "EEUI": 17.3
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "H3": {
+      "full_year_ac": {
+        "AEUI": 43.8,
+        "LEUI": 26.2,
+        "EEUI": 17.5
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "H4": {
+      "full_year_ac": {
+        "AEUI": 37.8,
+        "LEUI": 22.7,
+        "EEUI": 15.1
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "H5": {
+      "full_year_ac": {
+        "AEUI": 83.8,
+        "LEUI": 50.3,
+        "EEUI": 33.5
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "H6": {
+      "full_year_ac": {
+        "AEUI": 67.6,
+        "LEUI": 40.6,
+        "EEUI": 27.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "H7": {
+      "full_year_ac": {
+        "AEUI": 47.5,
+        "LEUI": 28.6,
+        "EEUI": 19.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "H8": {
+      "full_year_ac": {
+        "AEUI": 41.6,
+        "LEUI": 25.0,
+        "EEUI": 16.7
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "H9": {
+      "full_year_ac": {
+        "AEUI": 34.6,
+        "LEUI": 20.6,
+        "EEUI": 13.8
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "I1": {
+      "full_year_ac": {
+        "AEUI": 159.8,
+        "LEUI": 63.9,
+        "EEUI": 42.6
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "I2": {
+      "full_year_ac": {
+        "AEUI": 128.5,
+        "LEUI": 51.4,
+        "EEUI": 34.3
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "I3": {
+      "full_year_ac": {
+        "AEUI": 100.4,
+        "LEUI": 40.2,
+        "EEUI": 26.8
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "I4": {
+      "full_year_ac": {
+        "AEUI": 77.8,
+        "LEUI": 31.1,
+        "EEUI": 20.7
+      },
+      "intermittent_ac": {
+        "AEUI": 54.5,
+        "LEUI": 31.1,
+        "EEUI": 20.7
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "J1": {
+      "full_year_ac": {
+        "AEUI": 133.4,
+        "LEUI": 53.4,
+        "EEUI": 35.6
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "J2": {
+      "full_year_ac": {
+        "AEUI": 121.5,
+        "LEUI": 48.6,
+        "EEUI": 32.4
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "J3": {
+      "full_year_ac": {
+        "AEUI": 121.5,
+        "LEUI": 48.6,
+        "EEUI": 32.4
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "J4": {
+      "full_year_ac": {
+        "AEUI": 60.8,
+        "LEUI": 24.3,
+        "EEUI": 16.2
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "J5": {
+      "full_year_ac": {
+        "AEUI": 60.8,
+        "LEUI": 24.3,
+        "EEUI": 16.2
+      },
+      "intermittent_ac": {
+        "AEUI": 42.6,
+        "LEUI": 24.3,
+        "EEUI": 16.2
+      },
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "J6": {
+      "full_year_ac": {
+        "AEUI": 48.6,
+        "LEUI": 19.4,
+        "EEUI": 13.0
+      },
+      "intermittent_ac": {
+        "AEUI": 34.0,
+        "LEUI": 19.4,
+        "EEUI": 13.0
+      },
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "K1": {
+      "full_year_ac": {
+        "AEUI": 101.8,
+        "LEUI": 109.5,
+        "EEUI": 55.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      }
+    },
+    "K2": {
+      "full_year_ac": {
+        "AEUI": 101.8,
+        "LEUI": 109.5,
+        "EEUI": 59.7
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "K3": {
+      "full_year_ac": {
+        "AEUI": 101.8,
+        "LEUI": 109.5,
+        "EEUI": 140.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      },
+      "notes": "*4 EEUI includes refrigeration/freezer power."
+    },
+    "K4": {
+      "full_year_ac": {
+        "AEUI": 101.8,
+        "LEUI": 109.5,
+        "EEUI": 408.4
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      },
+      "notes": "*4 EEUI includes refrigeration/freezer power."
+    },
+    "K5": {
+      "full_year_ac": {
+        "AEUI": 115.2,
+        "LEUI": 154.0,
+        "EEUI": 816.7
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      },
+      "notes": "*4 EEUI includes refrigeration/freezer power."
+    },
+    "K6": {
+      "full_year_ac": {
+        "AEUI": 179.1,
+        "LEUI": 43.8,
+        "EEUI": 17.3
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "K7": {
+      "full_year_ac": {
+        "AEUI": 63.7,
+        "LEUI": 36.9,
+        "EEUI": 4.6
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      },
+      "notes": "Intermittent AC: treat as F2 per footnote *3."
+    },
+    "L1": {
+      "full_year_ac": {
+        "AEUI": 76.4,
+        "LEUI": 55.3,
+        "EEUI": 8.6
+      },
+      "intermittent_ac": {
+        "AEUI": 53.5,
+        "LEUI": 55.3,
+        "EEUI": 8.6
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "L2": {
+      "full_year_ac": {
+        "AEUI": 93.9,
+        "LEUI": 37.6,
+        "EEUI": 25.0
+      },
+      "intermittent_ac": {
+        "AEUI": 65.7,
+        "LEUI": 37.6,
+        "EEUI": 25.0
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "L3": {
+      "full_year_ac": {
+        "AEUI": 164.2,
+        "LEUI": 37.6,
+        "EEUI": 25.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "L4": {
+      "full_year_ac": {
+        "AEUI": 114.9,
+        "LEUI": 37.6,
+        "EEUI": 25.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "L5": {
+      "full_year_ac": {
+        "AEUI": 82.1,
+        "LEUI": 37.6,
+        "EEUI": 25.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "L6": {
+      "full_year_ac": {
+        "AEUI": 561.3,
+        "LEUI": 37.6,
+        "EEUI": 25.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "M1": {
+      "full_year_ac": {
+        "AEUI": 65.0,
+        "LEUI": 39.0,
+        "EEUI": 26.0
+      },
+      "intermittent_ac": {
+        "AEUI": 45.5,
+        "LEUI": 39.0,
+        "EEUI": 26.0
+      },
+      "UR": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": 1.0,
+        "D": 1.0
+      }
+    },
+    "M2": {
+      "full_year_ac": {
+        "AEUI": 16.0,
+        "LEUI": 15.0,
+        "EEUI": 6.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "M3": {
+      "full_year_ac": {
+        "AEUI": 21.0,
+        "LEUI": 21.0,
+        "EEUI": 8.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "M4": {
+      "full_year_ac": {
+        "AEUI": 23.0,
+        "LEUI": 22.0,
+        "EEUI": 9.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "M5": {
+      "full_year_ac": null,
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      },
+      "ref": "B2",
+      "notes": "Use B2 baseline per table."
+    },
+    "M6": {
+      "full_year_ac": null,
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      },
+      "ref": [
+        "C1",
+        "C2"
+      ],
+      "notes": "Use C1 or C2 baseline per table."
+    },
+    "M7": {
+      "full_year_ac": null,
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0
+      },
+      "ref": "L1",
+      "notes": "Use L1 baseline per table."
+    },
+    "N1": {
+      "full_year_ac": {
+        "AEUI": 34.3,
+        "LEUI": 40.1,
+        "EEUI": 12.4
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "N2": {
+      "full_year_ac": {
+        "AEUI": 50.4,
+        "LEUI": 40.1,
+        "EEUI": 12.4
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
+      }
+    },
+    "O1": {
+      "full_year_ac": {
+        "AEUI": 0.0,
+        "LEUI": 131.0,
+        "EEUI": 95.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": 1.0,
+        "D": 1.0
+      }
+    },
+    "O2": {
+      "full_year_ac": {
+        "AEUI": 0.0,
+        "LEUI": 47.0,
+        "EEUI": 31.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": 1.0,
+        "D": 1.0
+      }
+    },
+    "O3": {
+      "full_year_ac": {
+        "AEUI": 259.0,
+        "LEUI": 131.0,
+        "EEUI": 95.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": 1.0,
+        "D": 1.0
+      }
+    },
+    "O4": {
+      "full_year_ac": {
+        "AEUI": 76.0,
+        "LEUI": 47.0,
+        "EEUI": 31.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": 1.0,
+        "D": 1.0
+      }
+    },
+    "O5": {
+      "full_year_ac": {
+        "AEUI": 271.0,
+        "LEUI": 167.0,
+        "EEUI": 95.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": 1.0,
+        "D": 1.0
+      }
+    },
+    "O6": {
+      "full_year_ac": {
+        "AEUI": 78.0,
+        "LEUI": 58.0,
+        "EEUI": 31.0
+      },
+      "intermittent_ac": null,
+      "UR": {
+        "A": 1.0,
+        "B": 1.0,
+        "C": 1.0,
+        "D": 1.0
+      }
+    }
+  }
+}

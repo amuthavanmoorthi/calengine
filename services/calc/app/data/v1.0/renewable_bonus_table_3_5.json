@@ -1,0 +1,105 @@
+{
+  "version": "BERS_2024",
+  "source": {
+    "document": "Technical.pdf",
+    "section": "3-8 BERSn 對再生能源的優惠計算",
+    "table": "Table 3.5",
+    "title": "再生能源技術相當節電量 GE 與相當 PV 設置面積計算法"
+  },
+  "units": {
+    "ge": "kWh/yr",
+    "pv_capacity": "kW",
+    "pv_max_generation_efficiency": "kWh/(kW.day)",
+    "pv_equivalent_area": "m2",
+    "lng_carb_reduction": "kgCO2/yr",
+    "forest_carb_reduction": "kgCO2/yr",
+    "beta1": "kgCO2/kWh"
+  },
+  "global_constants": {
+    "pv_generation_correction_factor": 0.9,
+    "days_per_year": 365,
+    "pv_area_per_kw_m2_per_kw": 7.0,
+    "lng_co2_conversion_factor_kgco2_per_m3": 2.09,
+    "afforestation_co2_conversion_factor_kgco2_per_m2_yr": 1.5
+  },
+  "renewable_power_usage_factor_T": {
+    "self_use": 1.0,
+    "sell_to_grid": 0.5,
+    "renewable_certificate_purchase": 0.5,
+    "none": 0.0
+  },
+  "score_bonus_rules_3_8": {
+    "pv_area_method": {
+      "gamma_formula": "gamma = 0.1 * T * Rs, Rs <= 1.0",
+      "score_formula": "SCOREEE_after = SCOREEE_before * (1.0 + gamma)"
+    },
+    "generation_method": {
+      "eei_star_formula": "EEI* = EEI * (EUI* * AFe - GE) / (AFe * EUI*)",
+      "score_cap_rule": "SCOREEE_after <= 1.1 * SCOREEE_before"
+    }
+  },
+  "table_3_5_methods": {
+    "pv": {
+      "ge_formula": "GE = T * PV_installed_capacity_kW * pv_max_generation_efficiency_kWh_per_kW_day * 0.9 * 365",
+      "requires_inputs": [
+        "T",
+        "PV_installed_capacity_kW",
+        "pv_max_generation_efficiency_kWh_per_kW_day"
+      ]
+    },
+    "solar_thermal": {
+      "description": "由申請單位提供全年相當節電量 GE（kWh/yr）計算書與性能證明，再依 a 式換算相當 PV 設置面積。",
+      "requires_inputs": ["GE"]
+    },
+    "wind_power": {
+      "description": "由申請單位提供全年發電相當節電量 GE（kWh/yr）計算書與性能證明，再依 a 式換算相當 PV 設置面積。",
+      "requires_inputs": ["GE"]
+    },
+    "small_hydropower": {
+      "description": "由申請單位提供全年發電相當節電量 GE（kWh/yr）計算書與性能證明，再依 a 式換算相當 PV 設置面積。",
+      "requires_inputs": ["GE"]
+    },
+    "biomass": {
+      "lngc_formula": "LNGC = annual_biomass_heat_equivalent_as_LNG_m3 * 2.09",
+      "ge_formula": "GE = LNGC / beta1",
+      "pv_equivalent_area_formula": "PV_equivalent_area = 7.0 * GE / (pv_max_generation_efficiency * 0.9 * 365)",
+      "requires_inputs": [
+        "annual_biomass_heat_equivalent_as_LNG_m3 OR LNGC",
+        "beta1",
+        "pv_max_generation_efficiency_kWh_per_kW_day"
+      ]
+    },
+    "afforestation": {
+      "fc_formula": "FC = afforestation_area_m2 * 1.5",
+      "ge_formula": "GE = FC / beta1",
+      "pv_equivalent_area_formula": "PV_equivalent_area = 7.0 * GE / (pv_max_generation_efficiency * 0.9 * 365)",
+      "requires_inputs": [
+        "afforestation_area_m2 OR FC",
+        "beta1",
+        "pv_max_generation_efficiency_kWh_per_kW_day"
+      ]
+    }
+  },
+  "pv_equivalent_area_formula_a": "PV_equivalent_area_m2 = 7.0 * GE_kWh_per_yr / (pv_max_generation_efficiency_kWh_per_kW_day * 0.9 * 365)",
+  "pv_max_generation_efficiency_map_handling": {
+    "description": "Table 3.5 refers to a map figure (右圖所在位置PV最大發電效率), not a textual list. Engine should accept the selected value as an input parameter after UI/user selects project location value from the map.",
+    "recommended_input_field": "pv_max_generation_efficiency_kwh_per_kw_day",
+    "observed_values_from_map_figure": [
+      2.95,
+      3.01,
+      3.10,
+      3.20,
+      3.25,
+      3.31,
+      3.55,
+      3.75,
+      3.90,
+      3.95,
+      4.05
+    ]
+  },
+  "required_documents_notes": [
+    "太陽能熱水、風力、小水力、生質能需檢附計算書與性能證明。",
+    "購入型再生能源電量需檢附再生能源憑證，且承諾未來5年皆會購入與第1年相同電量。"
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "version": "BERS_2024",
+  "source": {
+    "document": "Technical.pdf",
+    "table": "Table 3.2",
+    "title": "各建築類組之外殼最大空調節能率 Es 與電梯年營運時間 YOHj(h/yr)"
+  },
+  "units": {
+    "es": "dimensionless",
+    "yohj": "h/yr",
+    "above_ground_floor_area": "m2"
+  },
+  "area_bands": [
+    {
+      "key": "lt_5000",
+      "label": "<5000",
+      "min_inclusive": null,
+      "max_exclusive": 5000
+    },
+    {
+      "key": "5000_to_lt_20000",
+      "label": "5000~<20000",
+      "min_inclusive": 5000,
+      "max_exclusive": 20000
+    },
+    {
+      "key": "20000_to_lt_40000",
+      "label": "20000~<40000",
+      "min_inclusive": 20000,
+      "max_exclusive": 40000
+    },
+    {
+      "key": "gt_40000",
+      "label": ">40000",
+      "min_inclusive": 40000,
+      "max_exclusive": null
+    }
+  ],
+  "rows": [
+    {
+      "source_label": "A-1 之集會表演",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 2250
+    },
+    {
+      "source_label": "A-1 之體育專用場館",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 2250
+    },
+    {
+      "source_label": "A-2 之國際航站",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 6570
+    },
+    {
+      "source_label": "A-2 車站、船站、國內航站",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 4700
+    },
+    {
+      "source_label": "B-1 娛樂場所",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 4700
+    },
+    {
+      "source_label": "B-2 商場百貨",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 4700
+    },
+    {
+      "source_label": "B-3 餐飲場所",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 4700
+    },
+    {
+      "source_label": "B-4 旅館",
+      "es_by_area_band": {
+        "lt_5000": 0.06,
+        "5000_to_lt_20000": 0.05,
+        "20000_to_lt_40000": 0.04,
+        "gt_40000": 0.03
+      },
+      "yohj_h_per_yr": 6570
+    },
+    {
+      "source_label": "C-2 之有清潔生產之工廠",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": "依實況統計"
+    },
+    {
+      "source_label": "C-2 之一般生產之工廠",
+      "es_by_area_band": {
+        "lt_5000": 0.08,
+        "5000_to_lt_20000": 0.06,
+        "20000_to_lt_40000": 0.05,
+        "gt_40000": 0.04
+      },
+      "yohj_h_per_yr": "依實況統計"
+    },
+    {
+      "source_label": "D-1 之健身休閒",
+      "es_by_area_band": {
+        "lt_5000": 0.06,
+        "5000_to_lt_20000": 0.05,
+        "20000_to_lt_40000": 0.04,
+        "gt_40000": 0.03
+      },
+      "yohj_h_per_yr": 5800
+    },
+    {
+      "source_label": "D-1 之體育專用場館",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 2250
+    },
+    {
+      "source_label": "D-2 之文教設施",
+      "es_by_area_band": {
+        "lt_5000": 0.06,
+        "5000_to_lt_20000": 0.05,
+        "20000_to_lt_40000": 0.04,
+        "gt_40000": 0.03
+      },
+      "yohj_h_per_yr": 2250
+    },
+    {
+      "source_label": "D-2 之特殊功能場館",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 2250
+    },
+    {
+      "source_label": "D-3&D-4 之教學辦公公樓",
+      "es_by_area_band": {
+        "lt_5000": 0.06,
+        "5000_to_lt_20000": 0.05,
+        "20000_to_lt_40000": 0.04,
+        "gt_40000": 0.03
+      },
+      "yohj_h_per_yr": 2500
+    },
+    {
+      "source_label": "D-3 乙教室",
+      "es_by_area_band": {
+        "lt_5000": 0.10,
+        "5000_to_lt_20000": 0.09,
+        "20000_to_lt_40000": 0.08,
+        "gt_40000": 0.07
+      },
+      "yohj_h_per_yr": 1430
+    },
+    {
+      "source_label": "D-4 乙教室",
+      "es_by_area_band": {
+        "lt_5000": 0.10,
+        "5000_to_lt_20000": 0.09,
+        "20000_to_lt_40000": 0.08,
+        "gt_40000": 0.07
+      },
+      "yohj_h_per_yr": 1880
+    },
+    {
+      "source_label": "D-5 補教課後照顧機構",
+      "es_by_area_band": {
+        "lt_5000": 0.10,
+        "5000_to_lt_20000": 0.09,
+        "20000_to_lt_40000": 0.08,
+        "gt_40000": 0.07
+      },
+      "yohj_h_per_yr": "依實況統計"
+    },
+    {
+      "source_label": "E 宗教殯儀設施",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": "依實況統計"
+    },
+    {
+      "source_label": "F-1 乙醫療照護(日照)",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 2500
+    },
+    {
+      "source_label": "F-1 乙醫療照護(醫院、長照)",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 6570
+    },
+    {
+      "source_label": "F-2 小型照護訓練機構",
+      "es_by_area_band": {
+        "lt_5000": 0.10,
+        "5000_to_lt_20000": 0.09,
+        "20000_to_lt_40000": 0.08,
+        "gt_40000": 0.07
+      },
+      "yohj_h_per_yr": 2500
+    },
+    {
+      "source_label": "F-3 兒少機構",
+      "es_by_area_band": {
+        "lt_5000": 0.10,
+        "5000_to_lt_20000": 0.09,
+        "20000_to_lt_40000": 0.08,
+        "gt_40000": 0.07
+      },
+      "yohj_h_per_yr": 2500
+    },
+    {
+      "source_label": "G-1 金融證券",
+      "es_by_area_band": {
+        "lt_5000": 0.06,
+        "5000_to_lt_20000": 0.05,
+        "20000_to_lt_40000": 0.04,
+        "gt_40000": 0.03
+      },
+      "yohj_h_per_yr": 2500
+    },
+    {
+      "source_label": "G-2 辦公場所",
+      "es_by_area_band": {
+        "lt_5000": 0.06,
+        "5000_to_lt_20000": 0.05,
+        "20000_to_lt_40000": 0.04,
+        "gt_40000": 0.03
+      },
+      "yohj_h_per_yr": 2500
+    },
+    {
+      "source_label": "G-3 門診零售服務",
+      "es_by_area_band": {
+        "lt_5000": 0.04,
+        "5000_to_lt_20000": 0.03,
+        "20000_to_lt_40000": 0.02,
+        "gt_40000": 0.01
+      },
+      "yohj_h_per_yr": 4700
+    },
+    {
+      "source_label": "H-1 及 H-2(住宅、集合住宅除外)",
+      "es_by_area_band": {
+        "lt_5000": 0.10,
+        "5000_to_lt_20000": 0.09,
+        "20000_to_lt_40000": 0.08,
+        "gt_40000": 0.07
+      },
+      "yohj_h_per_yr": 4000
+    }
+  ],
+  "notes": [
+    "This file stores Table 3.2 exactly as a lookup table.",
+    "YOHj values marked '依實況統計' must be provided from project operation conditions when calculating EtEUI."
+  ]
+}
