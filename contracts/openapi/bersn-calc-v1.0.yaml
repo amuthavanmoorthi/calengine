@@ -1,0 +1,131 @@
+openapi: 3.0.3
+info:
+  title: BERSn Calc Engine API
+  version: v1.0
+  description: >
+    Core BERSn calculation endpoints (calc service). This spec documents
+    the standardized error contract introduced in hardening step 2.
+servers:
+  - url: http://localhost:8000
+paths:
+  /calc/bersn/formulas/afe:
+    post:
+      summary: Eq. 3.1 AFe from AF and exempt/excluded zones
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormulaRequest"
+      responses:
+        "200":
+          description: Formula result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FormulaResponse"
+        "422":
+          description: Request/input validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardError"
+        "500":
+          description: Unexpected internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardError"
+  /calc/bersn/formulas/general-full:
+    post:
+      summary: End-to-end general branch (3-2-1 to 3-7)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FormulaRequest"
+      responses:
+        "200":
+          description: Formula result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FormulaResponse"
+        "422":
+          description: Request/input validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardError"
+        "500":
+          description: Unexpected internal error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StandardError"
+
+components:
+  schemas:
+    FormulaRequest:
+      type: object
+      required:
+        - calc_run_id
+        - formula_version
+        - inputs
+      properties:
+        calc_run_id:
+          type: string
+          minLength: 1
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          type: object
+          additionalProperties: true
+    FormulaResponse:
+      type: object
+      required:
+        - calc_run_id
+        - formula_version
+        - outputs
+        - trace
+      properties:
+        calc_run_id:
+          type: string
+        formula_version:
+          type: string
+          enum: [v1.0]
+        outputs:
+          type: object
+          additionalProperties: true
+        trace:
+          type: object
+          additionalProperties: true
+    StandardError:
+      type: object
+      required:
+        - ok
+        - error_code
+        - message
+      properties:
+        ok:
+          type: boolean
+          enum: [false]
+        error_code:
+          type: string
+          description: >
+            One of BERSN_REQUEST_VALIDATION_ERROR, BERSN_INPUT_VALIDATION_ERROR,
+            BERSN_NOT_FOUND, BERSN_HTTP_ERROR, BERSN_INTERNAL_ERROR.
+        message:
+          type: string
+        details:
+          nullable: true
+          oneOf:
+            - type: array
+              items:
+                type: object
+                additionalProperties: true
+            - type: object
+              additionalProperties: true
+            - type: string

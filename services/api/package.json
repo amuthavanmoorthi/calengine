@@ -4,9 +4,19 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test:smoke:error-envelope": "node src/tests/errorEnvelopeSmoke.mjs",
+    "test:smoke:runtime": "node src/tests/readinessRateLimitSmoke.mjs",
+    "test:smoke:calc-transport": "node src/tests/calcTransportSmoke.mjs",
+    "test:smoke:contract-runtime": "node src/tests/openapiRuntimeContractSmoke.mjs",
+    "test:smoke:validation-profiles": "node src/tests/validationProfilesSmoke.mjs",
+    "test:smoke:golden-path": "node src/tests/goldenPathSmoke.mjs",
+    "test:smoke:branch-coverage": "node src/tests/branchCoverageSmoke.mjs",
+    "test:smoke:persistence": "node src/tests/persistenceSmoke.mjs",
+    "bench:api": "node src/tests/perfBenchmark.mjs"
   },
   "dependencies": {
+    "cors": "^2.8.6",
     "express": "^4.19.2",
     "pg": "^8.12.0"
   }

@@ -1,0 +1,1767 @@
+openapi: 3.0.3
+info:
+  title: BERSn API Service
+  version: v1.0
+  description: >
+    Node API gateway contract for BERSn. Includes classification, orchestration,
+    formula proxy endpoints, run retrieval, and service health/readiness routes.
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: System
+  - name: Classification
+  - name: Orchestration
+  - name: Formulas
+  - name: Runs
+paths:
+  /health:
+    get:
+      tags: [System]
+      summary: Liveness check for API service
+      responses:
+        "200":
+          description: API healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthOk"
+        "500":
+          description: API unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthFail"
+
+  /ready:
+    get:
+      tags: [System]
+      summary: Readiness check for API + DB + calc service
+      responses:
+        "200":
+          description: Ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadyOk"
+        "503":
+          description: Not ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReadyFail"
+
+  /api/bersn/classification/normalize:
+    post:
+      tags: [Classification]
+      summary: Normalize mixed-use classification for BERSn 3-1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClassificationNormalizeRequest"
+      responses:
+        "200":
+          description: Normalization result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClassificationNormalizeResponse"
+        "400":
+          description: Normalization input validation failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClassificationNormalizeError"
+        "429":
+          description: API rate limited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRateLimitedError"
+
+  /api/bersn/calc:
+    post:
+      tags: [Orchestration]
+      summary: Create and run a BERSn calculation run
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RunCalcRequest"
+      responses:
+        "200":
+          description: Run created and completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunCalcResponse"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/afe:
+    post:
+      tags: [Formulas]
+      summary: Eq. 3.1 AFe
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestLegacy"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseAFe"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "422":
+          $ref: "#/components/responses/ApiInputValidationError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/eteui:
+    post:
+      tags: [Formulas]
+      summary: Eq. 3.2 EtEUI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestLegacy"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseEtEUI"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "422":
+          $ref: "#/components/responses/ApiInputValidationError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/weights:
+    post:
+      tags: [Formulas]
+      summary: Eq. 3.3-3.5 weights
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestLegacy"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseWeights"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "422":
+          $ref: "#/components/responses/ApiInputValidationError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/general-eei:
+    post:
+      tags: [Formulas]
+      summary: 3-3-1 general EEI path (stateless proxy)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestGeneralEEI"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseGeneralEEI"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/preprocess-efficiency:
+    post:
+      tags: [Formulas]
+      summary: 3-2-2 preprocess EEV/EAC/EL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestPreprocessEfficiency"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponsePreprocessEfficiency"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/eei-general:
+    post:
+      tags: [Formulas]
+      summary: Eq. 3.6 EEI (general)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestEEIGeneral"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseEEIGeneral"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/score-general:
+    post:
+      tags: [Formulas]
+      summary: Eq. 3.16a/3.16b score
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestScoreGeneral"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseScoreGeneral"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/scale-values-general:
+    post:
+      tags: [Formulas]
+      summary: Eq. 3.17-3.20 scale values
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestScaleValuesGeneral"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseScaleValuesGeneral"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/indicators-general:
+    post:
+      tags: [Formulas]
+      summary: Eq. 3.21-3.24 indicators
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestIndicatorsGeneral"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseIndicatorsGeneral"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/grade-general:
+    post:
+      tags: [Formulas]
+      summary: 3-7 grade mapping
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestGradeGeneral"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseGradeGeneral"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/general-full:
+    post:
+      tags: [Formulas]
+      summary: End-to-end general branch (3-2-1 -> 3-7)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestGeneralFull"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseGeneralFull"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/eac:
+    post:
+      tags: [Formulas]
+      summary: Appendix 2 EAC
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestEAC"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseEAC"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/el:
+    post:
+      tags: [Formulas]
+      summary: Appendix 2 EL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestEL"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseEL"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/hotwater-preprocess:
+    post:
+      tags: [Formulas]
+      summary: 3-3-2 hot-water preprocess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestHotwaterPreprocess"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseHotwaterPreprocess"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/hotwater-full:
+    post:
+      tags: [Formulas]
+      summary: End-to-end hot-water branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestHotwaterFull"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseHotwaterFull"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/renewable-preprocess:
+    post:
+      tags: [Formulas]
+      summary: Table 3.5 renewable preprocess
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestRenewablePreprocess"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseRenewablePreprocess"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/renewable-bonus:
+    post:
+      tags: [Formulas]
+      summary: 3-8 renewable bonus apply
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestRenewableBonus"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseRenewableBonus"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/nzb-eligibility:
+    post:
+      tags: [Formulas]
+      summary: 3-9 NZB grade gate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestNZBEligibility"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseNZBEligibility"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/nzb-balance:
+    post:
+      tags: [Formulas]
+      summary: 3-9 NZB TE/TGE balance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestNZBBalance"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseNZBBalance"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/formulas/nzb-evaluate:
+    post:
+      tags: [Formulas]
+      summary: 3-9 NZB final evaluation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StepRequestNZBEvaluate"
+      responses:
+        "200":
+          description: Formula execution success envelope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StepResponseNZBEvaluate"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+  /api/bersn/runs/{calc_run_id}:
+    get:
+      tags: [Runs]
+      summary: Get run details with step artifacts
+      parameters:
+        - in: path
+          name: calc_run_id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Run details found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RunDetailsResponse"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "404":
+          $ref: "#/components/responses/ApiNotFoundError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
+
+components:
+  responses:
+    ApiValidationError:
+      description: API request validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ApiInputValidationError:
+      description: Input or prerequisite validation failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ApiNotFoundError:
+      description: Requested entity not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ApiInternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ApiRateLimited:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiRateLimitedError"
+    ApiFormulaSuccess:
+      description: Formula execution success envelope
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiSuccessAny"
+
+  schemas:
+    ClassificationSegment:
+      type: object
+      required: [appendix1_code, area_m2]
+      properties:
+        appendix1_code:
+          type: string
+          minLength: 1
+          maxLength: 160
+        table_3_2_label:
+          type: string
+          minLength: 1
+          maxLength: 160
+        display_name:
+          type: string
+          maxLength: 160
+        area_m2:
+          type: number
+        operation_mode:
+          type: string
+          maxLength: 160
+        urban_zone:
+          type: string
+          maxLength: 160
+
+    ClassificationNormalizeRequest:
+      type: object
+      required: [total_above_ground_floor_area_m2, segments]
+      properties:
+        total_above_ground_floor_area_m2:
+          type: number
+        segments:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/ClassificationSegment"
+
+    ClassificationNormalizeResponse:
+      type: object
+      required: [ok, result]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        result:
+          type: object
+          additionalProperties: true
+
+    ClassificationNormalizeError:
+      type: object
+      required: [ok, error_code, message, error]
+      properties:
+        ok:
+          type: boolean
+          enum: [false]
+        error_code:
+          type: string
+          enum: [BERSN_3_1_NORMALIZATION_ERROR]
+        message:
+          type: string
+        error:
+          type: string
+
+    RunCalcRequest:
+      type: object
+      required: [project_id, branch_type, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        branch_type:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          type: object
+          additionalProperties: true
+
+    StepRequestLegacy:
+      type: object
+      required: [project_id, calc_run_id, formula_version]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+
+    StepRequestStateless:
+      type: object
+      required: [calc_run_id, formula_version, inputs]
+      properties:
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          type: object
+          additionalProperties: true
+
+    StepRequestDbBacked:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          type: object
+          additionalProperties: true
+
+    ElevatorGroupInput:
+      type: object
+      required: [Nej, Eelj, YOHj]
+      properties:
+        Nej:
+          type: number
+        Eelj:
+          type: number
+        YOHj:
+          type: number
+      additionalProperties: true
+
+    InputsGeneralEEI:
+      type: object
+      required: [AF, elevators, AEUI, LEUI, EAC, EEV, Es, EL, Et]
+      properties:
+        AF: { type: number }
+        AEUI: { type: number }
+        LEUI: { type: number }
+        EAC: { type: number }
+        EEV: { type: number }
+        Es: { type: number }
+        EL: { type: number }
+        Et: { type: number }
+        elevators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ElevatorGroupInput"
+      additionalProperties: true
+
+    InputsEEIGeneral:
+      type: object
+      required: [a, b, c, EAC, EEV, Es, EL, Et]
+      properties:
+        a: { type: number }
+        b: { type: number }
+        c: { type: number }
+        EAC: { type: number }
+        EEV: { type: number }
+        Es: { type: number }
+        EL: { type: number }
+        Et: { type: number }
+      additionalProperties: true
+
+    InputsScoreGeneral:
+      type: object
+      required: [EEI]
+      properties:
+        EEI: { type: number }
+      additionalProperties: true
+
+    InputsScaleValuesGeneral:
+      type: object
+      required: [AEUI, LEUI, EEUI, EtEUI, UR]
+      properties:
+        AEUI: { type: number }
+        LEUI: { type: number }
+        EEUI: { type: number }
+        EtEUI: { type: number }
+        UR: { type: number }
+      additionalProperties: true
+
+    InputsIndicatorsGeneral:
+      type: object
+      required: [SCOREEE, EUIn, EUIg, EUIm, EUImax, beta1, CFn]
+      properties:
+        SCOREEE: { type: number }
+        EUIn: { type: number }
+        EUIg: { type: number }
+        EUIm: { type: number }
+        EUImax: { type: number }
+        beta1: { type: number }
+        CFn: { type: number }
+      additionalProperties: true
+
+    InputsGradeGeneral:
+      type: object
+      required: [SCOREEE, EUI_star, EUIn, EUIg, EUImax]
+      properties:
+        SCOREEE: { type: number }
+        EUI_star: { type: number }
+        EUIn: { type: number }
+        EUIg: { type: number }
+        EUImax: { type: number }
+      additionalProperties: true
+
+    InputsGeneralFull:
+      type: object
+      required: [AF, elevators, AEUI, LEUI, EEUI, UR, Es, Et, beta1, CFn]
+      properties:
+        AF: { type: number }
+        AEUI: { type: number }
+        LEUI: { type: number }
+        EEUI: { type: number }
+        UR: { type: number }
+        Es: { type: number }
+        Et: { type: number }
+        beta1: { type: number }
+        CFn: { type: number }
+        elevators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ElevatorGroupInput"
+      additionalProperties: true
+
+    InputsEAC:
+      type: object
+      required: [eac_method]
+      properties:
+        eac_method:
+          type: string
+      additionalProperties: true
+
+    InputsEL:
+      type: object
+      description: Provide totals OR per-space rows.
+      properties:
+        el_numerator_total:
+          type: number
+        el_denominator_total:
+          type: number
+        el_spaces:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: true
+
+    InputsPreprocessEfficiency:
+      type: object
+      description: Supports direct EEV/EAC/EL values and/or Appendix-2 derived inputs.
+      properties:
+        EEV: { type: number }
+        EAC: { type: number }
+        EL: { type: number }
+        ev_scheme: { type: string }
+        ev_indicator: { type: string }
+        EV: { type: number }
+        building:
+          type: object
+          additionalProperties: true
+        envelope:
+          type: object
+          additionalProperties: true
+        eac_method: { type: string }
+        el_numerator_total: { type: number }
+        el_denominator_total: { type: number }
+        el_spaces:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+      additionalProperties: true
+
+    InputsHotwaterPreprocess:
+      type: object
+      required: [AFe, hotwater_category]
+      properties:
+        AFe: { type: number }
+        hotwater_category: { type: string }
+        hotwater_system_type: { type: string }
+        ehw_override: { type: number }
+      additionalProperties: true
+
+    InputsHotwaterFull:
+      type: object
+      required: [AF, elevators, AEUI, LEUI, EEUI, UR, Es, Et, beta1, CFn, hotwater_category]
+      properties:
+        AF: { type: number }
+        AEUI: { type: number }
+        LEUI: { type: number }
+        EEUI: { type: number }
+        UR: { type: number }
+        Es: { type: number }
+        Et: { type: number }
+        beta1: { type: number }
+        CFn: { type: number }
+        hotwater_category: { type: string }
+        elevators:
+          type: array
+          items:
+            $ref: "#/components/schemas/ElevatorGroupInput"
+      additionalProperties: true
+
+    InputsRenewablePreprocess:
+      type: object
+      required: [renewable_type]
+      properties:
+        renewable_type: { type: string }
+      additionalProperties: true
+
+    InputsRenewableBonus:
+      type: object
+      required: [method]
+      properties:
+        method:
+          type: string
+          enum: [pv_area_method, generation_method]
+      additionalProperties: true
+
+    InputsNZBEligibility:
+      type: object
+      required: [grade]
+      properties:
+        grade: { type: string }
+      additionalProperties: true
+
+    InputsNZBBalance:
+      type: object
+      required: [TEUI, AFe, TGE]
+      properties:
+        TEUI: { type: number }
+        AFe: { type: number }
+        TGE: { type: number }
+      additionalProperties: true
+
+    InputsNZBEvaluate:
+      type: object
+      required: [grade, TEUI, AFe, TGE]
+      properties:
+        grade: { type: string }
+        TEUI: { type: number }
+        AFe: { type: number }
+        TGE: { type: number }
+      additionalProperties: true
+
+    StepRequestGeneralEEI:
+      type: object
+      required: [calc_run_id, formula_version, inputs]
+      properties:
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsGeneralEEI"
+
+    StepRequestEEIGeneral:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsEEIGeneral"
+
+    StepRequestScoreGeneral:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsScoreGeneral"
+
+    StepRequestScaleValuesGeneral:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsScaleValuesGeneral"
+
+    StepRequestIndicatorsGeneral:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsIndicatorsGeneral"
+
+    StepRequestGradeGeneral:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsGradeGeneral"
+
+    StepRequestGeneralFull:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsGeneralFull"
+
+    StepRequestEAC:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsEAC"
+
+    StepRequestEL:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsEL"
+
+    StepRequestPreprocessEfficiency:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsPreprocessEfficiency"
+
+    StepRequestHotwaterPreprocess:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsHotwaterPreprocess"
+
+    StepRequestHotwaterFull:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsHotwaterFull"
+
+    StepRequestRenewablePreprocess:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsRenewablePreprocess"
+
+    StepRequestRenewableBonus:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsRenewableBonus"
+
+    StepRequestNZBEligibility:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsNZBEligibility"
+
+    StepRequestNZBBalance:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsNZBBalance"
+
+    StepRequestNZBEvaluate:
+      type: object
+      required: [project_id, calc_run_id, formula_version, inputs]
+      properties:
+        project_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        calc_run_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        formula_version:
+          type: string
+          enum: [v1.0]
+        inputs:
+          $ref: "#/components/schemas/InputsNZBEvaluate"
+
+    StepResponseBase:
+      type: object
+      required: [ok, calc_run_id, formula_version, outputs, trace]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        calc_run_id:
+          type: string
+        formula_version:
+          type: string
+          enum: [v1.0]
+        outputs:
+          type: object
+          additionalProperties: true
+        trace:
+          type: object
+          additionalProperties: true
+
+    StepResponseAFe:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [AFe]
+              properties:
+                AFe: { type: number }
+              additionalProperties: true
+
+    StepResponseEtEUI:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EtEUI]
+              properties:
+                EtEUI: { type: number }
+              additionalProperties: true
+
+    StepResponseWeights:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [a, b, c]
+              properties:
+                a: { type: number }
+                b: { type: number }
+                c: { type: number }
+              additionalProperties: true
+
+    StepResponseGeneralEEI:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [AFe, EtEUI, weights, EEI]
+              properties:
+                AFe: { type: number }
+                EtEUI: { type: number }
+                weights:
+                  type: object
+                  additionalProperties: true
+                EEI: { type: number }
+              additionalProperties: true
+
+    StepResponsePreprocessEfficiency:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EEV, EAC, EL]
+              properties:
+                EEV: { type: number }
+                EAC: { type: number }
+                EL: { type: number }
+              additionalProperties: true
+
+    StepResponseEEIGeneral:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EEI]
+              properties:
+                EEI: { type: number }
+              additionalProperties: true
+
+    StepResponseScoreGeneral:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [SCOREEE]
+              properties:
+                SCOREEE: { type: number }
+              additionalProperties: true
+
+    StepResponseScaleValuesGeneral:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EUIn, EUIg, EUIm, EUImax]
+              properties:
+                EUIn: { type: number }
+                EUIg: { type: number }
+                EUIm: { type: number }
+                EUImax: { type: number }
+              additionalProperties: true
+
+    StepResponseIndicatorsGeneral:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EUI_star, CEI_star, TEUI, ESR]
+              properties:
+                EUI_star: { type: number }
+                CEI_star: { type: number }
+                TEUI: { type: number }
+                ESR: { type: number }
+              additionalProperties: true
+
+    StepResponseGradeGeneral:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [grade]
+              properties:
+                grade: { type: string }
+              additionalProperties: true
+
+    StepResponseGeneralFull:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EEI, SCOREEE, scale_values, indicators, grade_result]
+              properties:
+                EEI: { type: number }
+                SCOREEE: { type: number }
+                scale_values:
+                  type: object
+                  additionalProperties: true
+                indicators:
+                  type: object
+                  additionalProperties: true
+                grade_result:
+                  type: object
+                  additionalProperties: true
+              additionalProperties: true
+
+    StepResponseEAC:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EAC]
+              properties:
+                EAC: { type: number }
+              additionalProperties: true
+
+    StepResponseEL:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EL]
+              properties:
+                EL: { type: number }
+              additionalProperties: true
+
+    StepResponseHotwaterPreprocess:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [HpEUI, EHW]
+              properties:
+                HpEUI: { type: number }
+                EHW: { type: number }
+              additionalProperties: true
+
+    StepResponseHotwaterFull:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [EEI, SCOREEE, hotwater, scale_values, indicators, grade_result]
+              properties:
+                EEI: { type: number }
+                SCOREEE: { type: number }
+                hotwater:
+                  type: object
+                  additionalProperties: true
+                scale_values:
+                  type: object
+                  additionalProperties: true
+                indicators:
+                  type: object
+                  additionalProperties: true
+                grade_result:
+                  type: object
+                  additionalProperties: true
+              additionalProperties: true
+
+    StepResponseRenewablePreprocess:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [renewable_type]
+              properties:
+                renewable_type: { type: string }
+              additionalProperties: true
+
+    StepResponseRenewableBonus:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [method]
+              properties:
+                method: { type: string }
+              additionalProperties: true
+
+    StepResponseNZBEligibility:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [is_grade_eligible]
+              properties:
+                is_grade_eligible: { type: boolean }
+              additionalProperties: true
+
+    StepResponseNZBBalance:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [TE, is_balance_pass]
+              properties:
+                TE: { type: number }
+                is_balance_pass: { type: boolean }
+              additionalProperties: true
+
+    StepResponseNZBEvaluate:
+      allOf:
+        - $ref: "#/components/schemas/StepResponseBase"
+        - type: object
+          properties:
+            outputs:
+              type: object
+              required: [is_nzb_pass]
+              properties:
+                is_nzb_pass: { type: boolean }
+              additionalProperties: true
+
+    RunCalcResponse:
+      type: object
+      required: [ok, calc_run_id, input_version_id, result]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        calc_run_id:
+          type: string
+        input_version_id:
+          type: string
+        result:
+          type: object
+          additionalProperties: true
+
+    RunDetailsResponse:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+      additionalProperties: true
+
+    ApiSuccessAny:
+      type: object
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+      additionalProperties: true
+
+    ApiError:
+      type: object
+      required: [ok, error_code, message]
+      properties:
+        ok:
+          type: boolean
+          enum: [false]
+        error_code:
+          type: string
+        message:
+          type: string
+        details:
+          nullable: true
+          oneOf:
+            - type: object
+              additionalProperties: true
+            - type: array
+              items:
+                type: object
+                additionalProperties: true
+            - type: string
+
+    ApiRateLimitedError:
+      allOf:
+        - $ref: "#/components/schemas/ApiError"
+        - type: object
+          properties:
+            error_code:
+              type: string
+              enum: [BERSN_API_RATE_LIMITED]
+
+    HealthOk:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+
+    HealthFail:
+      type: object
+      required: [status, error]
+      properties:
+        status:
+          type: string
+          enum: [fail]
+        error:
+          type: string
+
+    ReadyOk:
+      type: object
+      required: [status, request_id, checks]
+      properties:
+        status:
+          type: string
+          enum: [ready]
+        request_id:
+          type: string
+        checks:
+          type: object
+          properties:
+            database:
+              type: string
+            calc:
+              type: string
+
+    ReadyFail:
+      type: object
+      required: [status, request_id]
+      properties:
+        status:
+          type: string
+          enum: [not_ready]
+        request_id:
+          type: string
+        checks:
+          type: object
+          additionalProperties: true
+        error:
+          type: string

@@ -1,132 +1,159 @@
-import express from "express";
-import pg from "pg";
-import crypto from "crypto";
+import express from 'express';
+import cors from 'cors';
+import crypto from 'crypto';
+
+// Import the shared database pool for the health check
+import pool from './db.js';
+
+// Import the router which defines API endpoints
+import calcRoutes from './routes/calcRoutes.js';
 
 const app = express();
-app.use(express.json({ limit: "2mb" }));
+const RATE_LIMIT_WINDOW_MS = Number(process.env.API_RATE_LIMIT_WINDOW_MS || 60000);
+const RATE_LIMIT_MAX = Number(process.env.API_RATE_LIMIT_MAX || 120);
+const RATE_LIMIT_MAX_BUCKETS = Number(process.env.API_RATE_LIMIT_MAX_BUCKETS || 20000);
+const READY_CALC_TIMEOUT_MS = Number(process.env.READY_CALC_TIMEOUT_MS || 3000);
+const rateLimitBuckets = new Map();
+let lastRateLimitCleanupAt = 0;
 
-const {
-  DB_HOST = "postgres",
-  DB_PORT = "5432",
-  DB_NAME = "bersn",
-  DB_USER = "bersn",
-  DB_PASSWORD = "bersn",
-  CALC_URL = "http://bersn_calc:8000"
-} = process.env;
+// Parse JSON requests and cap payload size to avoid unbounded body growth.
+app.use(express.json({ limit: '2mb' }));
+app.use(
+  cors({
+    origin: 'http://localhost:5173',
+  }),
+);
 
-const pool = new pg.Pool({
-  host: DB_HOST,
-  port: Number(DB_PORT),
-  database: DB_NAME,
-  user: DB_USER,
-  password: DB_PASSWORD
+// Request-id propagation + minimal access logs for auditability.
+app.use((req, res, next) => {
+  const requestId = req.headers['x-request-id'] || crypto.randomUUID();
+  req.requestId = String(requestId);
+  res.setHeader('x-request-id', req.requestId);
+  const startedNs = process.hrtime.bigint();
+  res.on('finish', () => {
+    const elapsedMs = Number(process.hrtime.bigint() - startedNs) / 1_000_000;
+    console.log('[API request]', {
+      request_id: req.requestId,
+      method: req.method,
+      path: req.originalUrl,
+      status_code: res.statusCode,
+      elapsed_ms: Number(elapsedMs.toFixed(3)),
+    });
+  });
+  next();
 });
 
-app.get("/health", async (req, res) => {
+// Basic in-memory rate limit for /api endpoints.
+// This is process-local and intended as a safe baseline for service hardening.
+app.use('/api', (req, res, next) => {
+  const now = Date.now();
+  // Periodically prune expired buckets so cardinality does not grow forever.
+  if (now - lastRateLimitCleanupAt > RATE_LIMIT_WINDOW_MS || rateLimitBuckets.size > RATE_LIMIT_MAX_BUCKETS) {
+    for (const [bucketKey, bucketVal] of rateLimitBuckets.entries()) {
+      if (now >= bucketVal.resetAt) {
+        rateLimitBuckets.delete(bucketKey);
+      }
+    }
+    lastRateLimitCleanupAt = now;
+  }
+  const key = `${req.ip || 'unknown'}:${req.path}`;
+  const existing = rateLimitBuckets.get(key);
+
+  let bucket = existing;
+  if (!bucket || now >= bucket.resetAt) {
+    bucket = {
+      count: 0,
+      resetAt: now + RATE_LIMIT_WINDOW_MS,
+    };
+  }
+
+  bucket.count += 1;
+  rateLimitBuckets.set(key, bucket);
+
+  const remaining = Math.max(0, RATE_LIMIT_MAX - bucket.count);
+  res.setHeader('x-ratelimit-limit', String(RATE_LIMIT_MAX));
+  res.setHeader('x-ratelimit-remaining', String(remaining));
+  res.setHeader('x-ratelimit-reset', String(bucket.resetAt));
+
+  if (bucket.count > RATE_LIMIT_MAX) {
+    return res.status(429).json({
+      ok: false,
+      error_code: 'BERSN_API_RATE_LIMITED',
+      message: 'Rate limit exceeded for this endpoint.',
+      details: {
+        request_id: req.requestId,
+        limit: RATE_LIMIT_MAX,
+        window_ms: RATE_LIMIT_WINDOW_MS,
+        reset_at: bucket.resetAt,
+      },
+    });
+  }
+
+  return next();
+});
+
+// Health check route uses the shared pool to verify connectivity
+app.get('/health', async (req, res) => {
   try {
-    await pool.query("SELECT 1;");
-    res.json({ status: "ok" });
+    await pool.query('SELECT 1;');
+    res.json({ status: 'ok' });
   } catch (e) {
-    res.status(500).json({ status: "fail", error: String(e.message || e) });
+    res.status(500).json({ status: 'fail', error: String(e.message || e) });
   }
 });
 
-/**
- * POST /api/bersn/calc
- * body: { project_id, branch_type, formula_version, inputs }
- */
-app.post("/api/bersn/calc", async (req, res) => {
-  const { project_id, branch_type, formula_version, inputs } = req.body || {};
-
-  if (!project_id || !branch_type || !formula_version || !inputs) {
-    return res.status(400).json({
-      error: "Missing required fields: project_id, branch_type, formula_version, inputs"
-    });
-  }
-
-  const inputVersionId = crypto.randomUUID();
-  const calcRunId = crypto.randomUUID();
-  const payloadJson = { branch_type, formula_version, inputs };
-  const inputsHash = crypto
-    .createHash("sha256")
-    .update(JSON.stringify(payloadJson))
-    .digest("hex");
-
-  const client = await pool.connect();
+// Readiness checks both DB and calc service.
+app.get('/ready', async (req, res) => {
   try {
-    await client.query("BEGIN");
-
-    // 1) Insert input snapshot
-    await client.query(
-      `INSERT INTO bersn_input_versions (id, project_id, branch_type, formula_version, payload_json)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [inputVersionId, project_id, branch_type, formula_version, payloadJson]
-    );
-
-    // 2) Create calc run
-    await client.query(
-      `INSERT INTO calc_runs (id, input_version_id, inputs_hash, status, started_at)
-       VALUES ($1, $2, $3, 'RUNNING', now())`,
-      [calcRunId, inputVersionId, inputsHash]
-    );
-
-    // 3) Call Python calc engine
-    const calcResp = await fetch(`${CALC_URL}/calc/bersn/run`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        calc_run_id: calcRunId,
-        branch_type,
-        formula_version,
-        inputs
-      })
-    });
-
-    if (!calcResp.ok) {
-      const text = await calcResp.text();
-      throw new Error(`Calc engine error ${calcResp.status}: ${text}`);
+    await pool.query('SELECT 1;');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), READY_CALC_TIMEOUT_MS);
+    let calcResp;
+    try {
+      calcResp = await fetch('http://bersn_calc:8000/ready', {
+        headers: { 'x-request-id': req.requestId },
+        signal: controller.signal,
+      });
+    } catch (e) {
+      clearTimeout(timeout);
+      if (e?.name === 'AbortError') {
+        return res.status(503).json({
+          status: 'not_ready',
+          request_id: req.requestId,
+          checks: { database: 'ok', calc: 'timeout' },
+          error: `calc readiness timeout after ${READY_CALC_TIMEOUT_MS}ms`,
+        });
+      }
+      throw e;
+    } finally {
+      clearTimeout(timeout);
     }
 
-    const resultJson = await calcResp.json();
-
-    // 4) Save result artifact
-    await client.query(
-      `INSERT INTO calc_results (calc_run_id, result_json)
-       VALUES ($1, $2)`,
-      [calcRunId, resultJson]
-    );
-
-    // 5) Mark run success
-    await client.query(
-      `UPDATE calc_runs SET status='SUCCEEDED', finished_at=now() WHERE id=$1`,
-      [calcRunId]
-    );
-
-    await client.query("COMMIT");
-
-    return res.status(200).json({
-      calc_run_id: calcRunId,
-      input_version_id: inputVersionId,
-      result: resultJson
+    if (!calcResp.ok) {
+      return res.status(503).json({
+        status: 'not_ready',
+        request_id: req.requestId,
+        checks: { database: 'ok', calc: `fail_${calcResp.status}` },
+      });
+    }
+    return res.json({
+      status: 'ready',
+      request_id: req.requestId,
+      checks: { database: 'ok', calc: 'ok' },
     });
   } catch (e) {
-    await client.query("ROLLBACK");
-
-    // best effort mark failed
-    try {
-      await pool.query(
-        `UPDATE calc_runs SET status='FAILED', finished_at=now(), error_message=$2 WHERE id=$1`,
-        [calcRunId, String(e.message || e)]
-      );
-    } catch (_) {}
-
-    return res.status(500).json({ error: String(e.message || e) });
-  } finally {
-    client.release();
+    return res.status(503).json({
+      status: 'not_ready',
+      request_id: req.requestId,
+      error: String(e.message || e),
+    });
   }
 });
 
+// Mount API routes under /api
+app.use('/api', calcRoutes);
+
 const PORT = process.env.API_PORT ? Number(process.env.API_PORT) : 8080;
-app.listen(PORT, "0.0.0.0", () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`BERSn API listening on ${PORT}`);
 });

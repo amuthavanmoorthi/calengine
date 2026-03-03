@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "generate:postman": "node tools/scripts/generate_postman_from_openapi.mjs",
+    "check:contracts": "node tools/scripts/check_contract_sync.mjs",
+    "check:openapi": "node tools/scripts/check_openapi_structure.mjs",
+    "check:error-codes": "node tools/scripts/check_error_codes_registry.mjs",
+    "smoke:full": "bash tools/scripts/run_full_smoke_suite.sh"
+  },
+  "dependencies": {
+    "vue-router": "^5.0.2"
+  }
+}

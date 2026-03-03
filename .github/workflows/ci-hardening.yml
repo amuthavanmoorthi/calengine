@@ -1,0 +1,159 @@
+name: CI Hardening
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+
+jobs:
+  contract-sync:
+    name: Contract Sync
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run contract sync check
+        run: |
+          npm run check:openapi
+          npm run check:error-codes
+          npm run check:contracts
+
+  calc-tests:
+    name: Calc Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install calc dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r services/calc/requirements.txt
+          pip install -r services/calc/requirements-dev.txt
+
+      - name: Run calc pytest suite
+        env:
+          PYTHONPATH: services/calc
+        run: |
+          pytest -q services/calc/test
+
+  api-smoke:
+    name: API Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare Docker env
+        run: |
+          cat > infra/docker/.env <<'EOF'
+          ENV=ci
+          POSTGRES_DB=bersn
+          POSTGRES_USER=bersn
+          POSTGRES_PASSWORD=bersn
+          POSTGRES_PORT=5433
+          REDIS_PORT=6380
+          API_PORT=8080
+          CALC_PORT=8000
+          UI_PORT=5173
+          EOF
+
+      - name: Build and start stack
+        run: |
+          docker compose -f infra/docker/docker-compose.yml up -d --build postgres redis calc api
+
+      - name: Wait for calc ready
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://localhost:8000/ready > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Calc service did not become ready in time"
+          docker compose -f infra/docker/docker-compose.yml logs calc --tail=200 || true
+          exit 1
+
+      - name: Wait for api ready
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://localhost:8080/ready > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "API service did not become ready in time"
+          docker compose -f infra/docker/docker-compose.yml logs api --tail=200 || true
+          exit 1
+
+      - name: Smoke - Error Envelope
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api npm run test:smoke:error-envelope
+
+      - name: Smoke - Runtime/RateLimit
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api npm run test:smoke:runtime
+
+      - name: Smoke - Calc Transport
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api npm run test:smoke:calc-transport
+
+      - name: Smoke - OpenAPI Runtime Contract
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api npm run test:smoke:contract-runtime
+
+      - name: Smoke - Validation Profiles
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api npm run test:smoke:validation-profiles
+
+      - name: Smoke - Golden Path
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api npm run test:smoke:golden-path
+
+      - name: Smoke - Branch Coverage
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api npm run test:smoke:branch-coverage
+
+      - name: Smoke - Persistence
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api npm run test:smoke:persistence
+
+      - name: Run API performance gate
+        run: |
+          docker compose -f infra/docker/docker-compose.yml exec -T api env \
+            API_BASE_URL=http://localhost:8081 \
+            BENCH_ENDPOINT=/ready \
+            BENCH_METHOD=GET \
+            BENCH_TOTAL_REQUESTS=200 \
+            BENCH_CONCURRENCY=20 \
+            BENCH_MIN_SUCCESS_RATE_PCT=100 \
+            BENCH_MAX_P95_MS=300 \
+            BENCH_MAX_P99_MS=600 \
+            BENCH_MIN_THROUGHPUT_RPS=20 \
+            npm run bench:api
+
+      - name: Print container logs on failure
+        if: failure()
+        run: |
+          docker compose -f infra/docker/docker-compose.yml logs api --tail=200 || true
+          docker compose -f infra/docker/docker-compose.yml logs calc --tail=200 || true
+          docker compose -f infra/docker/docker-compose.yml logs postgres --tail=200 || true
+
+      - name: Shutdown stack
+        if: always()
+        run: |
+          docker compose -f infra/docker/docker-compose.yml down -v --remove-orphans

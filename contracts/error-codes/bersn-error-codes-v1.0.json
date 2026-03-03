@@ -1,0 +1,78 @@
+{
+  "version": "v1.0",
+  "description": "Canonical registry for BERSn API + calc error codes.",
+  "codes": [
+    {
+      "code": "BERSN_3_1_NORMALIZATION_ERROR",
+      "owner": "api",
+      "http_status_typical": 400,
+      "meaning": "3-1 classification normalization input or lookup validation failed."
+    },
+    {
+      "code": "BERSN_API_RATE_LIMITED",
+      "owner": "api",
+      "http_status_typical": 429,
+      "meaning": "API request exceeded configured rate limit window."
+    },
+    {
+      "code": "BERSN_API_VALIDATION_ERROR",
+      "owner": "api",
+      "http_status_typical": 400,
+      "meaning": "Required API request fields are missing or mismatched."
+    },
+    {
+      "code": "BERSN_API_INTERNAL_ERROR",
+      "owner": "api",
+      "http_status_typical": 500,
+      "meaning": "Unexpected API server-side failure."
+    },
+    {
+      "code": "CALC_ENGINE_VALIDATION_ERROR",
+      "owner": "api",
+      "http_status_typical": "4xx",
+      "meaning": "Calc service rejected the request or returned a non-OK response."
+    },
+    {
+      "code": "CALC_ENGINE_TIMEOUT",
+      "owner": "api",
+      "http_status_typical": 504,
+      "meaning": "Calc service call exceeded API timeout budget."
+    },
+    {
+      "code": "CALC_ENGINE_UNAVAILABLE",
+      "owner": "api",
+      "http_status_typical": 502,
+      "meaning": "Calc service is unreachable or network transport failed."
+    },
+    {
+      "code": "BERSN_REQUEST_VALIDATION_ERROR",
+      "owner": "calc",
+      "http_status_typical": 422,
+      "meaning": "Pydantic/FastAPI request model validation failed."
+    },
+    {
+      "code": "BERSN_INPUT_VALIDATION_ERROR",
+      "owner": "calc",
+      "http_status_typical": 422,
+      "meaning": "Formula/business input validation failed."
+    },
+    {
+      "code": "BERSN_NOT_FOUND",
+      "owner": "shared",
+      "http_status_typical": 404,
+      "meaning": "Requested resource/input/table row was not found."
+    },
+    {
+      "code": "BERSN_HTTP_ERROR",
+      "owner": "calc",
+      "http_status_typical": "4xx",
+      "meaning": "Other handled HTTP exception in calc service."
+    },
+    {
+      "code": "BERSN_INTERNAL_ERROR",
+      "owner": "calc",
+      "http_status_typical": 500,
+      "meaning": "Unhandled internal calc engine exception."
+    }
+  ]
+}
