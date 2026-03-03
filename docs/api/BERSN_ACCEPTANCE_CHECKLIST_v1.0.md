@@ -110,4 +110,4 @@ Use this checklist for release sign-off of backend formulas.
 ## Final Release Decision
 - [x] All checklist items passed
 - [x] Postman collection exported and tagged `BERSn-v1.0-frozen`
-- [ ] Contract file and checklist committed in same release PR
+- [x] Contract file and checklist committed in same release PR
