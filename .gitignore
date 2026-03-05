@@ -1,20 +1,25 @@
-cat > .gitignore << 'EOF'
 # OS
 .DS_Store
 
 # Env
 .env
+infra/docker/.env
 
 # Node
-node_modules
-dist
-coverage
+node_modules/
+**/node_modules/
+dist/
+coverage/
 
 # Python
 __pycache__/
+**/__pycache__/
 *.pyc
 .venv/
 
 # Logs
 *.log
-EOF
+
+# Editor
+.vscode/
+.idea/

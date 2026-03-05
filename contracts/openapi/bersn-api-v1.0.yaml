@@ -9,6 +9,7 @@ servers:
   - url: http://localhost:8080
 tags:
   - name: System
+  - name: Auth
   - name: Classification
   - name: Orchestration
   - name: Formulas
@@ -49,6 +50,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ReadyFail"
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Phase 1 test-account login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLoginRequest"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthLoginResponse"
+        "400":
+          $ref: "#/components/responses/ApiValidationError"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          $ref: "#/components/responses/ApiRateLimited"
+        "500":
+          $ref: "#/components/responses/ApiInternalError"
 
   /api/bersn/classification/normalize:
     post:
@@ -694,6 +725,35 @@ components:
             $ref: "#/components/schemas/ApiSuccessAny"
 
   schemas:
+    AuthLoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+
+    AuthLoginResponse:
+      type: object
+      required: [ok, session_id, user]
+      properties:
+        ok:
+          type: boolean
+          enum: [true]
+        session_id:
+          type: string
+        user:
+          type: object
+          required: [id, username, role]
+          properties:
+            id:
+              type: string
+            username:
+              type: string
+            role:
+              type: string
+
     ClassificationSegment:
       type: object
       required: [appendix1_code, area_m2]

@@ -27,6 +27,12 @@
       "meaning": "Unexpected API server-side failure."
     },
     {
+      "code": "BERSN_AUTH_INVALID_CREDENTIALS",
+      "owner": "api",
+      "http_status_typical": 401,
+      "meaning": "Login failed because username/password pair is invalid."
+    },
+    {
       "code": "CALC_ENGINE_VALIDATION_ERROR",
       "owner": "api",
       "http_status_typical": "4xx",

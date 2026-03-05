@@ -1,5 +1,13 @@
 Node.js API (orchestrator).
 
+## Phase 1 Auth
+
+- `POST /api/auth/login`
+- Demo credentials seeded by migration:
+  - username: `agency_test`
+  - password: `phase1_demo`
+- Login attempts are persisted in `auth_login_events`.
+
 ## Performance Hardening
 
 - DB pool is now tunable via env:

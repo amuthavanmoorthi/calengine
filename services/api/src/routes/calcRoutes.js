@@ -24,6 +24,7 @@ import {
   getRunDetails,
 } from '../controllers/calcController.js';
 import { normalizeBersnClassification } from '../controllers/classificationController.js';
+import { loginPhase1 } from '../controllers/authController.js';
 
 const router = Router();
 
@@ -42,6 +43,9 @@ router.post('/bersn/classification/normalize', normalizeBersnClassification);
 
 // Route for BERSn calculation
 router.post('/bersn/calc', runCalc);
+
+// Phase 1 login endpoint (DB-backed event logging).
+router.post('/auth/login', loginPhase1);
 
 //For AFE calculation
 router.post('/bersn/formulas/afe', runAFe);

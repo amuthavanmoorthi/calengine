@@ -58,6 +58,36 @@
       ]
     },
     {
+      "name": "Other",
+      "item": [
+        {
+          "name": "Phase 1 test-account login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "POST /api/auth/login"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Classification",
       "item": [
         {
