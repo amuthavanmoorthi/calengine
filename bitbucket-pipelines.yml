@@ -1,0 +1,95 @@
+image: atlassian/default-image:4
+
+options:
+  docker: true
+  size: 2x
+  max-time: 60
+
+definitions:
+  caches:
+    node-api: services/api/node_modules
+    node-ui: services/ui/node_modules
+    node-root: node_modules
+    pip-calc: /root/.cache/pip
+
+  steps:
+    - step: &contracts_and_ui
+        name: Contracts + UI Build
+        caches:
+          - node-root
+          - node-ui
+        script:
+          - node -v
+          - npm -v
+          - npm ci
+          - npm run check:contracts
+          - npm run check:openapi
+          - npm run check:error-codes
+          - cd services/ui
+          - npm ci
+          - npm run build
+
+    - step: &calc_unit_tests
+        name: Calc Unit Tests
+        caches:
+          - pip-calc
+        script:
+          - python3 --version
+          - pip3 install -r services/calc/requirements.txt -r services/calc/requirements-dev.txt
+          - pytest -q services/calc/test
+
+    - step: &docker_full_smoke
+        name: Docker Full Smoke Suite
+        services:
+          - docker
+        caches:
+          - node-root
+        script:
+          - npm ci
+          - npm run smoke:full
+        artifacts:
+          - docs/runbooks/BERSN_SMOKE_EVIDENCE_latest.md
+
+    - step: &deploy_testing
+        name: Deploy To Testing
+        deployment: test
+        trigger: manual
+        services:
+          - docker
+        script:
+          - >
+            if [ -z "${DOCKERHUB_USERNAME:-}" ] || [ -z "${DOCKERHUB_TOKEN:-}" ]; then
+              echo "Missing DOCKERHUB_USERNAME/DOCKERHUB_TOKEN repository variables";
+              exit 1;
+            fi
+          - export IMAGE_TAG="${BITBUCKET_BUILD_NUMBER}"
+          - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_TOKEN"
+          - docker build -t "$DOCKERHUB_USERNAME/bersn-api:${IMAGE_TAG}" services/api
+          - docker build -t "$DOCKERHUB_USERNAME/bersn-calc:${IMAGE_TAG}" services/calc
+          - docker push "$DOCKERHUB_USERNAME/bersn-api:${IMAGE_TAG}"
+          - docker push "$DOCKERHUB_USERNAME/bersn-calc:${IMAGE_TAG}"
+          - echo "Pushed images for testing stage:"
+          - echo "  $DOCKERHUB_USERNAME/bersn-api:${IMAGE_TAG}"
+          - echo "  $DOCKERHUB_USERNAME/bersn-calc:${IMAGE_TAG}"
+          - echo "Deploy these tags on your testing environment."
+
+pipelines:
+  default:
+    - parallel:
+        - step: *contracts_and_ui
+        - step: *calc_unit_tests
+    - step: *docker_full_smoke
+
+  branches:
+    main:
+      - parallel:
+          - step: *contracts_and_ui
+          - step: *calc_unit_tests
+      - step: *docker_full_smoke
+      - step: *deploy_testing
+
+  custom:
+    smoke-only:
+      - step: *docker_full_smoke
+    deploy-testing:
+      - step: *deploy_testing
