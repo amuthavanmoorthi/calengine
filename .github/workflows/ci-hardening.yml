@@ -32,7 +32,7 @@ jobs:
       - name: Build UI
         run: |
           cd services/ui
-          npm ci
+          npm install
           npm run build
 
   contract-sync:
