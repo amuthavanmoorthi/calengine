@@ -64,7 +64,6 @@ definitions:
     - step: &deploy_testing
         name: Deploy To Testing
         deployment: test
-        trigger: manual
         services:
           - docker
         script:
@@ -95,12 +94,16 @@ pipelines:
       - parallel:
           - step: *contracts_and_ui
           - step: *calc_unit_tests
-      - step: *deploy_testing
+      - step:
+          <<: *deploy_testing
+          trigger: manual
     main:
       - parallel:
           - step: *contracts_and_ui
           - step: *calc_unit_tests
-      - step: *deploy_testing
+      - step:
+          <<: *deploy_testing
+          trigger: manual
 
   custom:
     smoke-only:
