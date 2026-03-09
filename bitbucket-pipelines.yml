@@ -69,8 +69,9 @@ definitions:
         script:
           - >
             if [ -z "${DOCKERHUB_USERNAME:-}" ] || [ -z "${DOCKERHUB_TOKEN:-}" ]; then
-              echo "Missing DOCKERHUB_USERNAME/DOCKERHUB_TOKEN repository variables";
-              exit 1;
+              echo "Skipping deploy: missing DOCKERHUB_USERNAME/DOCKERHUB_TOKEN repository variables.";
+              echo "Add variables in Repository settings > Repository variables to enable image push.";
+              exit 0;
             fi
           - export IMAGE_TAG="${BITBUCKET_BUILD_NUMBER}"
           - docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_TOKEN"
