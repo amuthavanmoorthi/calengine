@@ -31,11 +31,12 @@ definitions:
 
     - step: &calc_unit_tests
         name: Calc Unit Tests
+        image: python:3.11
         caches:
           - pip-calc
         script:
-          - python3 --version
-          - pip3 install -r services/calc/requirements.txt -r services/calc/requirements-dev.txt
+          - python --version
+          - pip install -r services/calc/requirements.txt -r services/calc/requirements-dev.txt
           - pytest -q services/calc/test
 
     - step: &docker_full_smoke
