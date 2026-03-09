@@ -55,6 +55,8 @@ definitions:
               chmod +x /usr/local/bin/docker-compose;
             fi
           - docker compose version || docker-compose version
+          - export DOCKER_BUILDKIT=0
+          - export COMPOSE_DOCKER_CLI_BUILD=0
           - npm run smoke:full
         artifacts:
           - docs/runbooks/BERSN_SMOKE_EVIDENCE_latest.md
@@ -87,14 +89,12 @@ pipelines:
     - parallel:
         - step: *contracts_and_ui
         - step: *calc_unit_tests
-    - step: *docker_full_smoke
 
   branches:
     main:
       - parallel:
           - step: *contracts_and_ui
           - step: *calc_unit_tests
-      - step: *docker_full_smoke
       - step: *deploy_testing
 
   custom:

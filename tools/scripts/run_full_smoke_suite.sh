@@ -10,6 +10,11 @@ STACK_STARTED=0
 CURRENT_STEP=""
 COMPOSE_DRIVER=""
 
+# Bitbucket Pipelines docker service denies privileged BuildKit buildx containers.
+# Force legacy builder so `docker compose up --build` can run in CI.
+export DOCKER_BUILDKIT="${DOCKER_BUILDKIT:-0}"
+export COMPOSE_DOCKER_CLI_BUILD="${COMPOSE_DOCKER_CLI_BUILD:-0}"
+
 mkdir -p "$REPORT_DIR"
 
 timestamp_utc() {
