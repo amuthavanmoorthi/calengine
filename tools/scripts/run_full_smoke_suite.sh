@@ -4,11 +4,13 @@ set -Eeuo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 COMPOSE_FILE="$REPO_ROOT/infra/docker/docker-compose.yml"
 ENV_FILE="$REPO_ROOT/infra/docker/.env"
+CI_COMPOSE_OVERRIDE_FILE="$REPO_ROOT/infra/docker/docker-compose.ci.override.yml"
 REPORT_DIR="$REPO_ROOT/docs/runbooks"
 REPORT_FILE="$REPORT_DIR/BERSN_SMOKE_EVIDENCE_latest.md"
 STACK_STARTED=0
 CURRENT_STEP=""
 COMPOSE_DRIVER=""
+COMPOSE_FILES=("$COMPOSE_FILE")
 
 # Bitbucket Pipelines docker service denies privileged BuildKit buildx containers.
 # Force legacy builder so `docker compose up --build` can run in CI.
@@ -38,12 +40,17 @@ detect_compose_driver() {
 }
 
 compose_cmd() {
+  local compose_file_args=()
+  for compose_file in "${COMPOSE_FILES[@]}"; do
+    compose_file_args+=("-f" "$compose_file")
+  done
+
   if [[ "$COMPOSE_DRIVER" == "docker_compose" ]]; then
-    docker compose -f "$COMPOSE_FILE" "$@"
+    docker compose "${compose_file_args[@]}" "$@"
     return
   fi
   if [[ "$COMPOSE_DRIVER" == "docker-compose" ]]; then
-    docker-compose -f "$COMPOSE_FILE" "$@"
+    docker-compose "${compose_file_args[@]}" "$@"
     return
   fi
   echo "Compose driver not detected"
@@ -134,8 +141,20 @@ CALC_PORT=8000
 UI_PORT=5173
 EOF
 
+# Bitbucket Pipelines docker service blocks some mount patterns.
+# For CI runs, disable postgres volumes (data + bind migration mount).
+if [[ -n "${BITBUCKET_BUILD_NUMBER:-}" ]]; then
+  cat > "$CI_COMPOSE_OVERRIDE_FILE" <<'EOF'
+services:
+  postgres:
+    volumes: []
+EOF
+  COMPOSE_FILES+=("$CI_COMPOSE_OVERRIDE_FILE")
+fi
+
 cleanup() {
   compose_cmd down -v --remove-orphans >/dev/null 2>&1 || true
+  rm -f "$CI_COMPOSE_OVERRIDE_FILE" >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 

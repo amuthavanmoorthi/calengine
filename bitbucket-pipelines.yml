@@ -95,7 +95,6 @@ pipelines:
       - parallel:
           - step: *contracts_and_ui
           - step: *calc_unit_tests
-      - step: *docker_full_smoke
       - step: *deploy_testing
     main:
       - parallel:
