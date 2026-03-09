@@ -26,7 +26,7 @@ definitions:
           - npm run check:openapi
           - npm run check:error-codes
           - cd services/ui
-          - npm ci
+          - npm install
           - npm run build
 
     - step: &calc_unit_tests
