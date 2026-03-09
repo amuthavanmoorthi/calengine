@@ -37,6 +37,7 @@ definitions:
         script:
           - python --version
           - pip install -r services/calc/requirements.txt -r services/calc/requirements-dev.txt
+          - export PYTHONPATH=services/calc
           - pytest -q services/calc/test
 
     - step: &docker_full_smoke
