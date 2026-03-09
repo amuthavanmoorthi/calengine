@@ -48,6 +48,9 @@ definitions:
           - node-root
         script:
           - npm ci
+          - apt-get update && apt-get install -y python3-pip
+          - pip3 install docker-compose==1.29.2
+          - docker-compose version
           - npm run smoke:full
         artifacts:
           - docs/runbooks/BERSN_SMOKE_EVIDENCE_latest.md
