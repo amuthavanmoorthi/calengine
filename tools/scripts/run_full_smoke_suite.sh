@@ -8,6 +8,7 @@ REPORT_DIR="$REPO_ROOT/docs/runbooks"
 REPORT_FILE="$REPORT_DIR/BERSN_SMOKE_EVIDENCE_latest.md"
 STACK_STARTED=0
 CURRENT_STEP=""
+COMPOSE_DRIVER=""
 
 mkdir -p "$REPORT_DIR"
 
@@ -17,6 +18,31 @@ timestamp_utc() {
 
 append_report() {
   printf "%s\n" "$1" >> "$REPORT_FILE"
+}
+
+detect_compose_driver() {
+  if docker compose version >/dev/null 2>&1; then
+    COMPOSE_DRIVER="docker_compose"
+    return 0
+  fi
+  if command -v docker-compose >/dev/null 2>&1; then
+    COMPOSE_DRIVER="docker-compose"
+    return 0
+  fi
+  return 1
+}
+
+compose_cmd() {
+  if [[ "$COMPOSE_DRIVER" == "docker_compose" ]]; then
+    docker compose -f "$COMPOSE_FILE" "$@"
+    return
+  fi
+  if [[ "$COMPOSE_DRIVER" == "docker-compose" ]]; then
+    docker-compose -f "$COMPOSE_FILE" "$@"
+    return
+  fi
+  echo "Compose driver not detected"
+  return 1
 }
 
 run_step() {
@@ -43,26 +69,26 @@ append_failure_diagnostics() {
   append_report ""
   append_report "### docker compose ps"
   append_report '```text'
-  docker compose -f "$COMPOSE_FILE" ps >> "$REPORT_FILE" 2>&1 || true
+  compose_cmd ps >> "$REPORT_FILE" 2>&1 || true
   append_report '```'
 
   if [[ "$STACK_STARTED" -eq 1 ]]; then
     append_report ""
     append_report "### api logs (tail 120)"
     append_report '```text'
-    docker compose -f "$COMPOSE_FILE" logs api --tail=120 >> "$REPORT_FILE" 2>&1 || true
+    compose_cmd logs api --tail=120 >> "$REPORT_FILE" 2>&1 || true
     append_report '```'
 
     append_report ""
     append_report "### calc logs (tail 120)"
     append_report '```text'
-    docker compose -f "$COMPOSE_FILE" logs calc --tail=120 >> "$REPORT_FILE" 2>&1 || true
+    compose_cmd logs calc --tail=120 >> "$REPORT_FILE" 2>&1 || true
     append_report '```'
 
     append_report ""
     append_report "### postgres logs (tail 120)"
     append_report '```text'
-    docker compose -f "$COMPOSE_FILE" logs postgres --tail=120 >> "$REPORT_FILE" 2>&1 || true
+    compose_cmd logs postgres --tail=120 >> "$REPORT_FILE" 2>&1 || true
     append_report '```'
   fi
 }
@@ -104,11 +130,20 @@ UI_PORT=5173
 EOF
 
 cleanup() {
-  docker compose -f "$COMPOSE_FILE" down -v --remove-orphans >/dev/null 2>&1 || true
+  compose_cmd down -v --remove-orphans >/dev/null 2>&1 || true
 }
 trap cleanup EXIT
 
-run_step "Build and start stack" docker compose -f "$COMPOSE_FILE" up -d --build postgres redis calc api
+if ! detect_compose_driver; then
+  append_report "- [x] Docker Compose availability"
+  append_report "  - status: FAIL"
+  append_report "  - reason: neither 'docker compose' nor 'docker-compose' is available"
+  echo "Docker Compose is not available in this runner."
+  echo "Evidence file: $REPORT_FILE"
+  exit 1
+fi
+
+run_step "Build and start stack" compose_cmd up -d --build postgres redis calc api
 STACK_STARTED=1
 
 run_step "Wait calc ready" bash -lc '
@@ -131,16 +166,16 @@ done
 exit 1
 '
 
-run_step "Smoke - Error Envelope" docker compose -f "$COMPOSE_FILE" exec -T api npm run test:smoke:error-envelope
-run_step "Smoke - Runtime/RateLimit" docker compose -f "$COMPOSE_FILE" exec -T api npm run test:smoke:runtime
-run_step "Smoke - Calc Transport" docker compose -f "$COMPOSE_FILE" exec -T api npm run test:smoke:calc-transport
-run_step "Smoke - OpenAPI Runtime Contract" docker compose -f "$COMPOSE_FILE" exec -T api npm run test:smoke:contract-runtime
-run_step "Smoke - Validation Profiles" docker compose -f "$COMPOSE_FILE" exec -T api npm run test:smoke:validation-profiles
-run_step "Smoke - Golden Path" docker compose -f "$COMPOSE_FILE" exec -T api npm run test:smoke:golden-path
-run_step "Smoke - Branch Coverage" docker compose -f "$COMPOSE_FILE" exec -T api npm run test:smoke:branch-coverage
-run_step "Smoke - Persistence" docker compose -f "$COMPOSE_FILE" exec -T api npm run test:smoke:persistence
+run_step "Smoke - Error Envelope" compose_cmd exec -T api npm run test:smoke:error-envelope
+run_step "Smoke - Runtime/RateLimit" compose_cmd exec -T api npm run test:smoke:runtime
+run_step "Smoke - Calc Transport" compose_cmd exec -T api npm run test:smoke:calc-transport
+run_step "Smoke - OpenAPI Runtime Contract" compose_cmd exec -T api npm run test:smoke:contract-runtime
+run_step "Smoke - Validation Profiles" compose_cmd exec -T api npm run test:smoke:validation-profiles
+run_step "Smoke - Golden Path" compose_cmd exec -T api npm run test:smoke:golden-path
+run_step "Smoke - Branch Coverage" compose_cmd exec -T api npm run test:smoke:branch-coverage
+run_step "Smoke - Persistence" compose_cmd exec -T api npm run test:smoke:persistence
 
-run_step "API performance gate" docker compose -f "$COMPOSE_FILE" exec -T api env \
+run_step "API performance gate" compose_cmd exec -T api env \
   API_BASE_URL=http://localhost:8081 \
   BENCH_ENDPOINT=/ready \
   BENCH_METHOD=GET \
