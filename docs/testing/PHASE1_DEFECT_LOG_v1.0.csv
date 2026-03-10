@@ -1,0 +1,2 @@
+Defect_ID,Date,Case_ID,Summary,Severity,Status,Owner,Repro_Steps,Expected,Actual,Resolution
+DEF-001,YYYY-MM-DD,P1-TC-XX,<short summary>,Critical|Major|Minor,Open|In Progress|Resolved,<owner>,<steps>,<expected>,<actual>,<resolution note>

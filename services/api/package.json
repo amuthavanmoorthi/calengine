@@ -13,6 +13,7 @@
     "test:smoke:golden-path": "node src/tests/goldenPathSmoke.mjs",
     "test:smoke:branch-coverage": "node src/tests/branchCoverageSmoke.mjs",
     "test:smoke:persistence": "node src/tests/persistenceSmoke.mjs",
+    "test:phase1:initial": "node src/tests/phase1SystemInitialTest.mjs",
     "bench:api": "node src/tests/perfBenchmark.mjs"
   },
   "dependencies": {

@@ -1,0 +1,65 @@
+{
+  "generated_at": "2026-03-09T09:16:06.104Z",
+  "api_base_url": "http://localhost:8080",
+  "summary": {
+    "total": 6,
+    "pass": 6,
+    "fail": 0
+  },
+  "cases": [
+    {
+      "case_id": "P1-TC-01",
+      "title": "General non-residential (no hot water)",
+      "category": "Core path",
+      "expected": "EEI/SCOREEE/grade_result returned with valid numeric values.",
+      "actual": "EEI=0.6565272918124562, SCORE=69.12969442500585, grade=3",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "case_id": "P1-TC-02",
+      "title": "Central hot-water branch",
+      "category": "Core path",
+      "expected": "Hot-water outputs (HpEUI/EHW) and hot-water weight d are produced.",
+      "actual": "HpEUI=4.72668988235294, EHW=1.56, d=0.06567241483653097",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "case_id": "P1-TC-03",
+      "title": "Mixed-use building (weighting and threshold filter)",
+      "category": "Core path",
+      "expected": "Sub-segment under both 5% and 1000m2 is excluded from evaluated set.",
+      "actual": "evaluated_segment_count=2, segment[1].included=false",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "case_id": "P1-TC-04A",
+      "title": "Boundary: excluded zone area 99m2 vs 100m2",
+      "category": "Boundary",
+      "expected": "99m2 storage/equipment(no AC)=not excluded; 100m2=excluded.",
+      "actual": "99m2 include_in_afk=false, 100m2 include_in_afk=true",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "case_id": "P1-TC-04B",
+      "title": "Boundary: mixed-use area ratio 4.9% vs 5.0%",
+      "category": "Boundary",
+      "expected": "4.9% segment excluded, 5.0% segment included.",
+      "actual": "4.9% include=false, 5.0% include=true",
+      "pass": true,
+      "notes": ""
+    },
+    {
+      "case_id": "P1-TC-04C",
+      "title": "Boundary: grade threshold crossing (EUI*)",
+      "category": "Boundary",
+      "expected": "Small EUI* change across threshold changes grade_by_eui bucket.",
+      "actual": "below(54.999)=3, above(55.001)=4",
+      "pass": true,
+      "notes": "Threshold uses current Section 3-7 mapping behavior."
+    }
+  ]
+}

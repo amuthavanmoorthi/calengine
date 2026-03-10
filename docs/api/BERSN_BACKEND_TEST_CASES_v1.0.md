@@ -8,6 +8,12 @@ Provide a backend test pack for integration and regression, aligned to BERSn sec
 ## Execution Entry Point
 - Full suite: `npm run smoke:full`
 - Evidence output: `docs/runbooks/BERSN_SMOKE_EVIDENCE_latest.md`
+- Phase-1 initial test runner:
+  - `cd services/api`
+  - `API_BASE_URL=http://localhost:8081 npm run test:phase1:initial`
+  - Output:
+    - `docs/testing/results/PHASE1_SYSTEM_INITIAL_TEST_RESULTS.latest.json`
+    - `docs/testing/results/PHASE1_SYSTEM_INITIAL_TEST_RESULTS.latest.md`
 
 ## Test Buckets
 
@@ -62,8 +68,18 @@ Provide a backend test pack for integration and regression, aligned to BERSn sec
 - Script: `services/api/src/tests/perfBenchmark.mjs`
 - Gate configured in smoke runner for `/ready`.
 
+### 10) Phase-1 System Initial Test Pack
+- Script: `services/api/src/tests/phase1SystemInitialTest.mjs`
+- Verifies:
+  - General non-residential no-hot-water path
+  - Central hot-water path
+  - Mixed-use normalization path
+  - Boundary logic:
+    - 99m² vs 100m² excluded-zone inclusion
+    - 4.9% vs 5.0% mixed-use threshold
+    - EUI* grade-threshold crossing behavior
+
 ## Pass Criteria
 - Every smoke script passes in clean Docker environment.
 - Performance threshold checks pass.
 - Evidence file records final status `PASS`.
-
