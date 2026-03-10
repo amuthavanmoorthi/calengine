@@ -20,7 +20,10 @@ let lastRateLimitCleanupAt = 0;
 app.use(express.json({ limit: '2mb' }));
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'https://calengine-ui.zeabur.app',
+    ],
   }),
 );
 
