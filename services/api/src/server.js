@@ -15,15 +15,52 @@ const RATE_LIMIT_MAX_BUCKETS = Number(process.env.API_RATE_LIMIT_MAX_BUCKETS || 
 const READY_CALC_TIMEOUT_MS = Number(process.env.READY_CALC_TIMEOUT_MS || 3000);
 const rateLimitBuckets = new Map();
 let lastRateLimitCleanupAt = 0;
+const DEFAULT_ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:8080',
+  'http://localhost:8081',
+  'https://calengine-ui.zeabur.app',
+];
+const configuredAllowedOrigins = String(process.env.API_ALLOWED_ORIGINS || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = new Set([...DEFAULT_ALLOWED_ORIGINS, ...configuredAllowedOrigins]);
+
+function isAllowedCorsOrigin(origin) {
+  if (!origin) {
+    return true;
+  }
+  if (allowedOrigins.has(origin)) {
+    return true;
+  }
+  try {
+    const parsed = new URL(origin);
+    if (parsed.protocol === 'https:' && parsed.hostname.endsWith('.zeabur.app')) {
+      return true;
+    }
+  } catch (_error) {
+    return false;
+  }
+  return false;
+}
 
 // Parse JSON requests and cap payload size to avoid unbounded body growth.
 app.use(express.json({ limit: '2mb' }));
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      'https://calengine-ui.zeabur.app',
-    ],
+    // Use a callback so deployed frontends can be allowed without freezing the
+    // service to one hardcoded origin. This keeps localhost working while also
+    // permitting Zeabur preview/custom app domains.
+    origin(origin, callback) {
+      if (isAllowedCorsOrigin(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error(`CORS blocked for origin: ${origin}`));
+    },
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
+    credentials: false,
   }),
 );
 
