@@ -33,6 +33,12 @@
       "meaning": "Login failed because username/password pair is invalid."
     },
     {
+      "code": "BERSN_API_CORS_BLOCKED",
+      "owner": "api",
+      "http_status_typical": 403,
+      "meaning": "API rejected a browser origin that is not allowed by the deployed CORS policy."
+    },
+    {
       "code": "CALC_ENGINE_VALIDATION_ERROR",
       "owner": "api",
       "http_status_typical": "4xx",
