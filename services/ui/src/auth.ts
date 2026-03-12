@@ -2,6 +2,10 @@ const AUTH_KEY = 'bersn_phase1_auth';
 const SESSION_KEY = 'bersn_phase1_session';
 const DEMO_USERNAME = 'agency_test';
 const DEMO_PASSWORD = 'phase1_demo';
+// Frontend -> API URL by environment:
+// - Development UI (local Vite frontend): use `http://localhost:8080`
+// - Testing UI (Zeabur frontend): `.env.production` sets `VITE_API_URL=https://calengine-api.zeabur.app`
+// - Production UI: set `VITE_API_URL` to the future production API URL
 const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:8080';
 
 export class LoginError extends Error {

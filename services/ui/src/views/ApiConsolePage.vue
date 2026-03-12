@@ -54,6 +54,10 @@
 import { computed, ref } from 'vue';
 import { navigate } from '../nav';
 
+// Frontend -> API URL by environment:
+// - Development UI (local Vite frontend): use `http://localhost:8080`
+// - Testing UI (Zeabur frontend): `.env.production` sets `VITE_API_URL=https://calengine-api.zeabur.app`
+// - Production UI: set `VITE_API_URL` to the future production API URL
 const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:8080';
 const PROJECT_ID = '11111111-1111-1111-1111-111111111111';
 const FORMULA_VERSION = 'v1.0';
