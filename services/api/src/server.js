@@ -12,15 +12,24 @@ const RATE_LIMIT_WINDOW_MS = Number(process.env.API_RATE_LIMIT_WINDOW_MS || 6000
 const RATE_LIMIT_MAX = Number(process.env.API_RATE_LIMIT_MAX || 120);
 const RATE_LIMIT_MAX_BUCKETS = Number(process.env.API_RATE_LIMIT_MAX_BUCKETS || 20000);
 const READY_CALC_TIMEOUT_MS = Number(process.env.READY_CALC_TIMEOUT_MS || 3000);
+// Calc engine URL by environment:
+// - Development/local Docker: default fallback `http://bersn_calc:8000`
+// - Testing (Zeabur): set `CALC_URL=https://calengine-cal.zeabur.app`
+// - Production: replace with the future production calc URL
 const CALC_URL = process.env.CALC_URL || 'http://bersn_calc:8000';
 const rateLimitBuckets = new Map();
 let lastRateLimitCleanupAt = 0;
 const DEFAULT_ALLOWED_ORIGINS = [
-  // 'http://localhost:5173',
-  // 'http://localhost:8080',
-  // 'http://localhost:8081',
+  // Development UI (local Vite frontend)
+  'http://localhost:5173',
+  // Local API host URLs used during browser-based manual checks
+  'http://localhost:8080',
+  'http://localhost:8081',
+  // Testing UI (Zeabur frontend)
   'https://calengine-ui.zeabur.app',
 ];
+// Production UI origin should be added with `API_ALLOWED_ORIGINS`
+// so the deployed API accepts the production frontend without changing code.
 const configuredAllowedOrigins = String(process.env.API_ALLOWED_ORIGINS || '')
   .split(',')
   .map((origin) => origin.trim())
