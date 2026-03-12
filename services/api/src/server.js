@@ -12,6 +12,7 @@ const RATE_LIMIT_WINDOW_MS = Number(process.env.API_RATE_LIMIT_WINDOW_MS || 6000
 const RATE_LIMIT_MAX = Number(process.env.API_RATE_LIMIT_MAX || 120);
 const RATE_LIMIT_MAX_BUCKETS = Number(process.env.API_RATE_LIMIT_MAX_BUCKETS || 20000);
 const READY_CALC_TIMEOUT_MS = Number(process.env.READY_CALC_TIMEOUT_MS || 3000);
+const CALC_URL = process.env.CALC_URL || 'http://bersn_calc:8000';
 const rateLimitBuckets = new Map();
 let lastRateLimitCleanupAt = 0;
 const DEFAULT_ALLOWED_ORIGINS = [
@@ -155,7 +156,7 @@ app.get('/ready', async (req, res) => {
     const timeout = setTimeout(() => controller.abort(), READY_CALC_TIMEOUT_MS);
     let calcResp;
     try {
-      calcResp = await fetch('http://bersn_calc:8000/ready', {
+      calcResp = await fetch(`${CALC_URL}/ready`, {
         headers: { 'x-request-id': req.requestId },
         signal: controller.signal,
       });
