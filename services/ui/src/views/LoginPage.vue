@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { getDemoPassword, getDemoUsername, login } from '../auth';
+import { getDemoPassword, getDemoUsername, LoginError, login } from '../auth';
 import { navigate } from '../nav';
 
 const demoUsername = getDemoUsername();
@@ -43,18 +43,18 @@ const loading = ref(false);
 
 async function onSubmit() {
   loading.value = true;
-  let ok = false;
   try {
-    ok = await login(username.value.trim(), password.value);
-  } catch (_) {
-    ok = false;
+    await login(username.value.trim(), password.value);
+    error.value = '';
+    navigate('/dashboard');
+  } catch (err) {
+    if (err instanceof LoginError) {
+      error.value = err.message;
+    } else {
+      error.value = 'Unexpected login error. Check browser console and API logs.';
+    }
+  } finally {
+    loading.value = false;
   }
-  loading.value = false;
-  if (!ok) {
-    error.value = 'Invalid credentials for Phase 1 test account.';
-    return;
-  }
-  error.value = '';
-  navigate('/dashboard');
 }
 </script>

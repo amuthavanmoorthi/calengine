@@ -1,5 +1,4 @@
 import express from 'express';
-import cors from 'cors';
 import crypto from 'crypto';
 
 // Import the shared database pool for the health check
@@ -16,9 +15,9 @@ const READY_CALC_TIMEOUT_MS = Number(process.env.READY_CALC_TIMEOUT_MS || 3000);
 const rateLimitBuckets = new Map();
 let lastRateLimitCleanupAt = 0;
 const DEFAULT_ALLOWED_ORIGINS = [
-  'http://localhost:5173',
-  'http://localhost:8080',
-  'http://localhost:8081',
+  // 'http://localhost:5173',
+  // 'http://localhost:8080',
+  // 'http://localhost:8081',
   'https://calengine-ui.zeabur.app',
 ];
 const configuredAllowedOrigins = String(process.env.API_ALLOWED_ORIGINS || '')
@@ -47,22 +46,28 @@ function isAllowedCorsOrigin(origin) {
 
 // Parse JSON requests and cap payload size to avoid unbounded body growth.
 app.use(express.json({ limit: '2mb' }));
-app.use(
-  cors({
-    // Use a callback so deployed frontends can be allowed without freezing the
-    // service to one hardcoded origin. This keeps localhost working while also
-    // permitting Zeabur preview/custom app domains.
-    origin(origin, callback) {
-      if (isAllowedCorsOrigin(origin)) {
-        return callback(null, true);
-      }
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Request-Id'],
-    credentials: false,
-  }),
-);
+app.use((req, res, next) => {
+  const requestOrigin = req.headers.origin;
+  if (requestOrigin && isAllowedCorsOrigin(requestOrigin)) {
+    res.setHeader('Access-Control-Allow-Origin', requestOrigin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization,X-Request-Id');
+  }
+
+  if (req.method === 'OPTIONS') {
+    if (requestOrigin && !isAllowedCorsOrigin(requestOrigin)) {
+      return res.status(403).json({
+        ok: false,
+        error_code: 'BERSN_API_CORS_BLOCKED',
+        message: `CORS blocked for origin: ${requestOrigin}`,
+      });
+    }
+    return res.status(204).end();
+  }
+
+  return next();
+});
 
 // Request-id propagation + minimal access logs for auditability.
 app.use((req, res, next) => {
