@@ -133,7 +133,7 @@ async function run() {
         EL: 0.65,
         Es: 0.05,
         Et: 0.5,
-        beta1: 0.494,
+        beta1: 0.474,
         CFn: 0.91,
       },
     });
@@ -175,7 +175,7 @@ async function run() {
         EL: 0.4921367521367521,
         Es: 0.05,
         Et: 0.5,
-        beta1: 0.494,
+        beta1: 0.474,
         CFn: 0.91,
         hotwater_category: 'hotel',
         hotwater_system_type: 'electric_storage',

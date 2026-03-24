@@ -19,3 +19,16 @@ From `infra/docker`:
 ```bash
 docker compose up -d --build
 ```
+
+## Migrations
+Apply versioned Postgres migrations to an existing environment:
+
+```bash
+npm run db:migrate
+```
+
+Check migration status:
+
+```bash
+npm run db:migrate:status
+```

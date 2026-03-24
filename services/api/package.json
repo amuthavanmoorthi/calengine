@@ -5,6 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
+    "db:migrate": "node src/scripts/runDbMigrations.mjs",
+    "db:migrate:status": "node src/scripts/runDbMigrations.mjs status",
     "test:smoke:error-envelope": "node src/tests/errorEnvelopeSmoke.mjs",
     "test:smoke:runtime": "node src/tests/readinessRateLimitSmoke.mjs",
     "test:smoke:calc-transport": "node src/tests/calcTransportSmoke.mjs",

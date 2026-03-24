@@ -1,7 +1,20 @@
 :root {
-  font-family: "Segoe UI", "Noto Sans", sans-serif;
+  --ui-font-sans: "Segoe UI", "Noto Sans TC", "Noto Sans", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --ui-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-2xs: 0.6875rem;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1rem;
+  --text-xl: 1.125rem;
+  --text-2xl: 1.625rem;
+  font-family: var(--ui-font-sans);
   color: #14233b;
   background: linear-gradient(160deg, #eef6ff 0%, #f7fbff 40%, #e9f2ff 100%);
+}
+
+html {
+  font-size: 16px;
 }
 
 * {
@@ -11,10 +24,48 @@
 body {
   margin: 0;
   min-height: 100vh;
+  font-family: var(--ui-font-sans);
+  font-size: var(--text-base);
+  line-height: 1.5;
 }
 
 #app {
   min-height: 100vh;
+  font-family: var(--ui-font-sans);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+label,
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.title-block h1 {
+  font-size: var(--text-2xl);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+
+.title-block p {
+  font-size: var(--text-base);
+  line-height: 1.55;
+  color: #475569;
 }
 
 .page-shell {
@@ -48,7 +99,7 @@ body {
 
 .eyebrow {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #2f5c94;
@@ -57,7 +108,7 @@ body {
 
 h1 {
   margin: 0.4rem 0;
-  font-size: 1.9rem;
+  font-size: var(--text-2xl);
 }
 
 .version {
@@ -101,7 +152,7 @@ h1 {
 }
 
 .field span {
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: #355074;
 }
@@ -112,7 +163,7 @@ h1 {
   border: 1px solid #b8cce8;
   border-radius: 10px;
   padding: 0.58rem 0.65rem;
-  font-size: 0.94rem;
+  font-size: var(--text-base);
   background: #fff;
   color: #132944;
 }
@@ -243,7 +294,7 @@ h1 {
 .kpi-title {
   margin: 0;
   color: #3d608a;
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.02em;
   text-transform: uppercase;
 }
@@ -251,7 +302,7 @@ h1 {
 .kpi-value {
   display: block;
   margin-top: 0.5rem;
-  font-size: 1.16rem;
+  font-size: var(--text-xl);
 }
 
 .module-grid {
@@ -316,12 +367,12 @@ h1 {
 }
 
 .metric span {
-  font-size: 0.78rem;
+  font-size: var(--text-xs);
   color: #3f5f85;
 }
 
 .metric strong {
-  font-size: 1.2rem;
+  font-size: var(--text-xl);
 }
 
 .breakdown {
@@ -348,7 +399,7 @@ h1 {
   border: 1px solid #bfd5f4;
   border-radius: 999px;
   padding: 0.2rem 0.55rem;
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   color: #204d84;
   background: #f2f8ff;
 }
@@ -372,7 +423,7 @@ h1 {
   background: #f1f7ff;
   border-radius: 8px;
   padding: 0.5rem;
-  font-size: 0.8rem;
+  font-size: var(--text-xs);
   max-height: 240px;
   overflow: auto;
 }
@@ -383,10 +434,10 @@ h1 {
   border: 1px solid #b8cce8;
   border-radius: 10px;
   padding: 0.58rem 0.65rem;
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   background: #fff;
   color: #132944;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-family: var(--ui-font-mono);
 }
 
 .status-ok {
@@ -407,7 +458,7 @@ li {
 }
 
 .hint {
-  font-size: 0.86rem;
+  font-size: var(--text-sm);
   color: #38567b;
   margin-top: 1rem;
 }
@@ -416,6 +467,7 @@ li {
   color: #a32020;
   font-weight: 600;
   margin: 0.7rem 0 0;
+  font-size: var(--text-sm);
 }
 
 @media (max-width: 900px) {

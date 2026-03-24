@@ -12,6 +12,11 @@ import {
   insertInputVersion, createCalcRun, saveCalcResult, updateRunStatus, pool,
   getRunInputSnapshot, saveStepResult, getStepResult, getRunWithSteps
 } from '../models/calcModel.js';
+import {
+  applyManagedBeta1ToInputs,
+  scheduleBeta1Verification,
+  shouldInjectManagedBeta1,
+} from '../services/beta1Service.js';
 
 
 const { CALC_URL = 'http://bersn_calc:8000' } = process.env;
@@ -416,17 +421,17 @@ export async function runCalc(req, res) {
   if (inputsEnvelopeError) {
     return sendApiError(res, 400, 'BERSN_API_VALIDATION_ERROR', inputsEnvelopeError, { request_id: req.requestId });
   }
-
   const inputVersionId = crypto.randomUUID();
   const calcRunId = crypto.randomUUID();
-  const payloadJson = { branch_type, formula_version, inputs };
-  const inputsHash = crypto
-    .createHash('sha256')
-    .update(JSON.stringify(payloadJson))
-    .digest('hex');
-
   const client = await pool.connect();
   try {
+    const { inputs: managedInputs } = await applyManagedBeta1ToInputs(client, inputs);
+    const payloadJson = { branch_type, formula_version, inputs: managedInputs };
+    const inputsHash = crypto
+      .createHash('sha256')
+      .update(JSON.stringify(payloadJson))
+      .digest('hex');
+
     await client.query('BEGIN');
 
     // 1) Insert input snapshot
@@ -443,7 +448,7 @@ export async function runCalc(req, res) {
         calc_run_id: calcRunId,
         branch_type,
         formula_version,
-        inputs,
+        inputs: managedInputs,
       },
     });
 
@@ -477,6 +482,7 @@ export async function runCalc(req, res) {
     await updateRunStatus(client, calcRunId, 'SUCCEEDED');
 
     await client.query('COMMIT');
+    scheduleBeta1Verification(req.requestId);
 
     return sendApiSuccess(res, 200, {
       calc_run_id: calcRunId,
@@ -941,11 +947,6 @@ async function runAndStoreFormulaStep(req, res, config) {
   if (inputsEnvelopeError) {
     return sendApiError(res, 400, 'BERSN_API_VALIDATION_ERROR', inputsEnvelopeError, { request_id: req.requestId });
   }
-  const profileError = validateFormulaInputsByProfile(calcPath, inputs);
-  if (profileError) {
-    return sendApiError(res, 400, 'BERSN_API_VALIDATION_ERROR', profileError, { request_id: req.requestId });
-  }
-
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -965,6 +966,18 @@ async function runAndStoreFormulaStep(req, res, config) {
       );
     }
 
+    let calcInputs = inputs;
+    if (shouldInjectManagedBeta1(calcPath, inputs)) {
+      const managed = await applyManagedBeta1ToInputs(client, inputs);
+      calcInputs = managed.inputs;
+    }
+
+    const profileError = validateFormulaInputsByProfile(calcPath, calcInputs);
+    if (profileError) {
+      await client.query("ROLLBACK");
+      return sendApiError(res, 400, 'BERSN_API_VALIDATION_ERROR', profileError, { request_id: req.requestId });
+    }
+
     // Call Python calc formula endpoint.
     const pyResp = await callCalcWithTimeoutRetry({
       path: calcPath,
@@ -972,7 +985,7 @@ async function runAndStoreFormulaStep(req, res, config) {
       payload: {
         calc_run_id,
         formula_version,
-        inputs,
+        inputs: calcInputs,
       },
     });
 
@@ -998,11 +1011,14 @@ async function runAndStoreFormulaStep(req, res, config) {
     // Persist both request inputs and calc output/trace for reproducibility.
     // This is the key per-step audit artifact used by review/report pages.
     await saveStepResult(client, calc_run_id, stepName, {
-      request_inputs: inputs,
+      request_inputs: calcInputs,
       response: stepResult,
     });
 
     await client.query("COMMIT");
+    if (shouldInjectManagedBeta1(calcPath, inputs)) {
+      scheduleBeta1Verification(req.requestId);
+    }
     return sendApiSuccess(res, 200, stepResult);
   } catch (e) {
     try {

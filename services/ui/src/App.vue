@@ -3,6 +3,7 @@
   <DashboardPage v-else-if="path === '/dashboard'" />
   <CalculationPage v-else-if="path === '/calculation'" />
   <ApiConsolePage v-else-if="path === '/api-console'" />
+  <SubmissionPage v-else-if="path === '/submission'" />
   <LoginPage v-else />
 </template>
 
@@ -12,6 +13,7 @@ import LoginPage from './views/LoginPage.vue';
 import DashboardPage from './views/DashboardPage.vue';
 import CalculationPage from './views/CalculationPage.vue';
 import ApiConsolePage from './views/ApiConsolePage.vue';
+import SubmissionPage from './views/SubmissionPage.vue';
 import { isLoggedIn } from './auth';
 import { navigate } from './nav';
 

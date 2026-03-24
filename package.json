@@ -4,7 +4,9 @@
     "check:contracts": "node tools/scripts/check_contract_sync.mjs",
     "check:openapi": "node tools/scripts/check_openapi_structure.mjs",
     "check:error-codes": "node tools/scripts/check_error_codes_registry.mjs",
-    "smoke:full": "bash tools/scripts/run_full_smoke_suite.sh"
+    "smoke:full": "bash tools/scripts/run_full_smoke_suite.sh",
+    "db:migrate": "npm --prefix services/api run db:migrate",
+    "db:migrate:status": "npm --prefix services/api run db:migrate:status"
   },
   "dependencies": {
     "vue-router": "^5.0.2"
