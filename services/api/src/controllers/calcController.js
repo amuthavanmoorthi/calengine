@@ -333,6 +333,12 @@ function sendCalcTransportError(res, requestId, err) {
   );
 }
 
+async function rollbackQuietly(client) {
+  try {
+    await client.query('ROLLBACK');
+  } catch (_) {}
+}
+
 
 async function callCalcWithTimeoutRetry({
   path,
@@ -533,17 +539,23 @@ export async function runAFe(req, res) {
   }
 
   const client = await pool.connect();
+  let transactionOpen = false;
   try {
     await client.query('BEGIN');
+    transactionOpen = true;
 
     // 1) Load input snapshot for this run
     const snap = await getRunInputSnapshot(client, calc_run_id);
     if (!snap) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(res, 404, 'BERSN_NOT_FOUND', 'calc_run_id not found', { request_id: req.requestId });
     }
 
     // 2) Ensure the run belongs to the project_id caller provided
     if (String(snap.project_id) !== String(project_id)) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         400,
@@ -563,9 +575,13 @@ export async function runAFe(req, res) {
     const excluded_zones = storedInputs.excluded_zones || null;
 
     if (AF === undefined || AF === null) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(res, 422, 'BERSN_INPUT_VALIDATION_ERROR', 'Stored inputs missing: AF', { request_id: req.requestId });
     }
     if (!Array.isArray(exempt_areas)) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         422,
@@ -575,6 +591,8 @@ export async function runAFe(req, res) {
       );
     }
     if (excluded_zones !== null && !Array.isArray(excluded_zones)) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         422,
@@ -610,11 +628,15 @@ export async function runAFe(req, res) {
     await saveStepResult(client, calc_run_id, 'AFe', stepResult);
 
     await client.query('COMMIT');
+    transactionOpen = false;
 
     // 6) Return step result to frontend
     return sendApiSuccess(res, 200, stepResult);
   } catch (e) {
-    await client.query('ROLLBACK');
+    if (transactionOpen) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
+    }
     if (isCalcTransportError(e)) {
       return sendCalcTransportError(res, req.requestId, e);
     }
@@ -648,15 +670,23 @@ export async function runEtEUI(req, res) {
   }
 
   const client = await pool.connect();
+  let transactionOpen = false;
   try {
     await client.query('BEGIN');
+    transactionOpen = true;
 
     // 1) Load snapshot for this run
     const snap = await getRunInputSnapshot(client, calc_run_id);
-    if (!snap) return sendApiError(res, 404, 'BERSN_NOT_FOUND', 'calc_run_id not found', { request_id: req.requestId });
+    if (!snap) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
+      return sendApiError(res, 404, 'BERSN_NOT_FOUND', 'calc_run_id not found', { request_id: req.requestId });
+    }
 
     // 2) Validate project match (Option C)
     if (String(snap.project_id) !== String(project_id)) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         400,
@@ -672,6 +702,8 @@ export async function runEtEUI(req, res) {
     const elevators = storedInputs.elevators || [];
 
     if (!Array.isArray(elevators)) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         422,
@@ -686,6 +718,8 @@ export async function runEtEUI(req, res) {
     const afe = afeStep?.outputs?.AFe;
 
     if (afe === undefined || afe === null) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         422,
@@ -720,9 +754,13 @@ export async function runEtEUI(req, res) {
     await saveStepResult(client, calc_run_id, 'EtEUI', stepResult);
 
     await client.query('COMMIT');
+    transactionOpen = false;
     return sendApiSuccess(res, 200, stepResult);
   } catch (e) {
-    await client.query('ROLLBACK');
+    if (transactionOpen) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
+    }
     if (isCalcTransportError(e)) {
       return sendCalcTransportError(res, req.requestId, e);
     }
@@ -756,15 +794,23 @@ export async function runWeights(req, res) {
   }
 
   const client = await pool.connect();
+  let transactionOpen = false;
   try {
     await client.query("BEGIN");
+    transactionOpen = true;
 
     // 1) Load snapshot
     const snap = await getRunInputSnapshot(client, calc_run_id);
-    if (!snap) return sendApiError(res, 404, 'BERSN_NOT_FOUND', 'calc_run_id not found', { request_id: req.requestId });
+    if (!snap) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
+      return sendApiError(res, 404, 'BERSN_NOT_FOUND', 'calc_run_id not found', { request_id: req.requestId });
+    }
 
     // 2) Validate project match
     if (String(snap.project_id) !== String(project_id)) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         400,
@@ -782,9 +828,13 @@ export async function runWeights(req, res) {
     const operation_mode = storedInputs.operation_mode; // "full_year_ac" | "intermittent_ac"
 
     if (!building_code) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(res, 422, 'BERSN_INPUT_VALIDATION_ERROR', 'Stored inputs missing: building_code', { request_id: req.requestId });
     }
     if (!operation_mode) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(res, 422, 'BERSN_INPUT_VALIDATION_ERROR', 'Stored inputs missing: operation_mode', { request_id: req.requestId });
     }
 
@@ -792,6 +842,8 @@ export async function runWeights(req, res) {
     const eteuiStep = await getStepResult(client, calc_run_id, "EtEUI");
     const EtEUI = eteuiStep?.outputs?.EtEUI;
     if (EtEUI === undefined || EtEUI === null) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         422,
@@ -827,9 +879,13 @@ export async function runWeights(req, res) {
     await saveStepResult(client, calc_run_id, "WEIGHTS", stepResult);
 
     await client.query("COMMIT");
+    transactionOpen = false;
     return sendApiSuccess(res, 200, stepResult);
   } catch (e) {
-    await client.query("ROLLBACK");
+    if (transactionOpen) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
+    }
     if (isCalcTransportError(e)) {
       return sendCalcTransportError(res, req.requestId, e);
     }
@@ -948,15 +1004,21 @@ async function runAndStoreFormulaStep(req, res, config) {
     return sendApiError(res, 400, 'BERSN_API_VALIDATION_ERROR', inputsEnvelopeError, { request_id: req.requestId });
   }
   const client = await pool.connect();
+  let transactionOpen = false;
   try {
     await client.query("BEGIN");
+    transactionOpen = true;
 
     // Ensure calc_run exists and belongs to project.
     const snap = await getRunInputSnapshot(client, calc_run_id);
     if (!snap) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(res, 404, 'BERSN_NOT_FOUND', 'calc_run_id not found', { request_id: req.requestId });
     }
     if (String(snap.project_id) !== String(project_id)) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         400,
@@ -974,7 +1036,8 @@ async function runAndStoreFormulaStep(req, res, config) {
 
     const profileError = validateFormulaInputsByProfile(calcPath, calcInputs);
     if (profileError) {
-      await client.query("ROLLBACK");
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(res, 400, 'BERSN_API_VALIDATION_ERROR', profileError, { request_id: req.requestId });
     }
 
@@ -992,7 +1055,8 @@ async function runAndStoreFormulaStep(req, res, config) {
     if (!pyResp.ok) {
       const parsed = await parseCalcErrorResponse(pyResp);
       const normalizedParsed = normalizeCalcErrorPayload(parsed);
-      await client.query("ROLLBACK");
+      await rollbackQuietly(client);
+      transactionOpen = false;
       return sendApiError(
         res,
         pyResp.status,
@@ -1016,14 +1080,16 @@ async function runAndStoreFormulaStep(req, res, config) {
     });
 
     await client.query("COMMIT");
+    transactionOpen = false;
     if (shouldInjectManagedBeta1(calcPath, inputs)) {
       scheduleBeta1Verification(req.requestId);
     }
     return sendApiSuccess(res, 200, stepResult);
   } catch (e) {
-    try {
-      await client.query("ROLLBACK");
-    } catch (_) {}
+    if (transactionOpen) {
+      await rollbackQuietly(client);
+      transactionOpen = false;
+    }
     if (isCalcTransportError(e)) {
       return sendCalcTransportError(res, req.requestId, e);
     }
