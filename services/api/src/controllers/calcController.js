@@ -431,7 +431,7 @@ export async function runCalc(req, res) {
   const calcRunId = crypto.randomUUID();
   const client = await pool.connect();
   try {
-    const { inputs: managedInputs } = await applyManagedBeta1ToInputs(client, inputs);
+    const { inputs: managedInputs } = await applyManagedBeta1ToInputs(pool, inputs);
     const payloadJson = { branch_type, formula_version, inputs: managedInputs };
     const inputsHash = crypto
       .createHash('sha256')
@@ -1030,7 +1030,7 @@ async function runAndStoreFormulaStep(req, res, config) {
 
     let calcInputs = inputs;
     if (shouldInjectManagedBeta1(calcPath, inputs)) {
-      const managed = await applyManagedBeta1ToInputs(client, inputs);
+      const managed = await applyManagedBeta1ToInputs(pool, inputs);
       calcInputs = managed.inputs;
     }
 
