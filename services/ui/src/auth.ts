@@ -8,6 +8,16 @@ const DEMO_PASSWORD = 'phase1_demo';
 // - Production UI: set `VITE_API_URL` to the future production API URL
 const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:8080';
 
+function clearLegacyPersistentAuth(): void {
+  localStorage.removeItem(AUTH_KEY);
+  localStorage.removeItem(SESSION_KEY);
+}
+
+function getAuthFlag(): string | null {
+  clearLegacyPersistentAuth();
+  return sessionStorage.getItem(AUTH_KEY);
+}
+
 export class LoginError extends Error {
   kind: 'invalid_credentials' | 'network';
 
@@ -38,17 +48,19 @@ export async function login(username: string, password: string): Promise<void> {
     throw new LoginError('invalid_credentials', 'Invalid credentials for Phase 1 test account.');
   }
 
-  localStorage.setItem(AUTH_KEY, 'true');
-  localStorage.setItem(SESSION_KEY, String(body.session_id || ''));
+  clearLegacyPersistentAuth();
+  sessionStorage.setItem(AUTH_KEY, 'true');
+  sessionStorage.setItem(SESSION_KEY, String(body.session_id || ''));
 }
 
 export function logout(): void {
-  localStorage.removeItem(AUTH_KEY);
-  localStorage.removeItem(SESSION_KEY);
+  clearLegacyPersistentAuth();
+  sessionStorage.removeItem(AUTH_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
 }
 
 export function isLoggedIn(): boolean {
-  return localStorage.getItem(AUTH_KEY) === 'true';
+  return getAuthFlag() === 'true';
 }
 
 export function getDemoUsername(): string {
