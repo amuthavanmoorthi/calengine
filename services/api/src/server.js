@@ -208,7 +208,11 @@ app.get('/ready', async (req, res) => {
 // Mount API routes under /api
 app.use('/api', calcRoutes);
 
-const PORT = process.env.API_PORT ? Number(process.env.API_PORT) : 8080;
+const PORT = process.env.PORT
+  ? Number(process.env.PORT)
+  : process.env.API_PORT
+    ? Number(process.env.API_PORT)
+    : 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`BERSn API listening on ${PORT}`);
 });
