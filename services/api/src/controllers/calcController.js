@@ -339,6 +339,10 @@ async function rollbackQuietly(client) {
   } catch (_) {}
 }
 
+async function resetClientSession(client) {
+  await rollbackQuietly(client);
+}
+
 
 async function callCalcWithTimeoutRetry({
   path,
@@ -431,6 +435,7 @@ export async function runCalc(req, res) {
   const calcRunId = crypto.randomUUID();
   const client = await pool.connect();
   try {
+    await resetClientSession(client);
     const { inputs: managedInputs } = await applyManagedBeta1ToInputs(pool, inputs);
     const payloadJson = { branch_type, formula_version, inputs: managedInputs };
     const inputsHash = crypto
@@ -541,6 +546,7 @@ export async function runAFe(req, res) {
   const client = await pool.connect();
   let transactionOpen = false;
   try {
+    await resetClientSession(client);
     await client.query('BEGIN');
     transactionOpen = true;
 
@@ -672,6 +678,7 @@ export async function runEtEUI(req, res) {
   const client = await pool.connect();
   let transactionOpen = false;
   try {
+    await resetClientSession(client);
     await client.query('BEGIN');
     transactionOpen = true;
 
@@ -796,6 +803,7 @@ export async function runWeights(req, res) {
   const client = await pool.connect();
   let transactionOpen = false;
   try {
+    await resetClientSession(client);
     await client.query("BEGIN");
     transactionOpen = true;
 
@@ -1006,6 +1014,7 @@ async function runAndStoreFormulaStep(req, res, config) {
   const client = await pool.connect();
   let transactionOpen = false;
   try {
+    await resetClientSession(client);
     await client.query("BEGIN");
     transactionOpen = true;
 
@@ -1243,6 +1252,7 @@ export async function getRunDetails(req, res) {
 
   const client = await pool.connect();
   try {
+    await resetClientSession(client);
     const data = await getRunWithSteps(client, calcRunId);
     if (!data) return sendApiError(res, 404, 'BERSN_NOT_FOUND', 'calc_run_id not found', { request_id: req.requestId });
 

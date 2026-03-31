@@ -31,6 +31,16 @@ function buildSuccessResponse(res, user) {
   });
 }
 
+async function rollbackQuietly(client) {
+  try {
+    await client.query('ROLLBACK');
+  } catch (_) {}
+}
+
+async function resetClientSession(client) {
+  await rollbackQuietly(client);
+}
+
 export async function loginPhase1(req, res) {
   const { username, password } = req.body || {};
   if (
@@ -62,6 +72,7 @@ export async function loginPhase1(req, res) {
     let client = null;
     try {
       client = await pool.connect();
+      await resetClientSession(client);
       await client.query('BEGIN');
       const dbUser = await findActiveUserByCredentials(client, normalizedUsername, password);
       await insertLoginEvent(client, {
@@ -73,9 +84,7 @@ export async function loginPhase1(req, res) {
       return buildSuccessResponse(res, dbUser || demoUser);
     } catch (_error) {
       if (client) {
-        try {
-          await client.query('ROLLBACK');
-        } catch (_) {}
+        await rollbackQuietly(client);
       }
       return buildSuccessResponse(res, demoUser);
     } finally {
@@ -85,6 +94,7 @@ export async function loginPhase1(req, res) {
 
   const client = await pool.connect();
   try {
+    await resetClientSession(client);
     await client.query('BEGIN');
 
     const user = await findActiveUserByCredentials(client, normalizedUsername, password);
@@ -122,9 +132,7 @@ export async function loginPhase1(req, res) {
       },
     });
   } catch (e) {
-    try {
-      await client.query('ROLLBACK');
-    } catch (_) {}
+    await rollbackQuietly(client);
     return res.status(500).json({
       ok: false,
       error_code: 'BERSN_API_INTERNAL_ERROR',
