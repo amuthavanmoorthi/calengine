@@ -15,7 +15,7 @@ import CalculationPage from './views/CalculationPage.vue';
 import ApiConsolePage from './views/ApiConsolePage.vue';
 import SubmissionPage from './views/SubmissionPage.vue';
 import { isLoggedIn } from './auth';
-import { navigate } from './nav';
+import { navigate, subscribeNavigation } from './nav';
 
 const path = ref(window.location.pathname || '/login');
 
@@ -34,7 +34,10 @@ function syncPath() {
 
 onMounted(() => {
   syncPath();
-  window.addEventListener('popstate', syncPath);
+  cleanupNavigationSubscription = subscribeNavigation(syncPath);
 });
-onBeforeUnmount(() => window.removeEventListener('popstate', syncPath));
+
+let cleanupNavigationSubscription: (() => void) | null = null;
+
+onBeforeUnmount(() => cleanupNavigationSubscription?.());
 </script>
