@@ -15,25 +15,44 @@ import CalculationPage from './views/CalculationPage.vue';
 import ApiConsolePage from './views/ApiConsolePage.vue';
 import SubmissionPage from './views/SubmissionPage.vue';
 import { isLoggedIn } from './auth';
-import { navigate, subscribeNavigation } from './nav';
+import { subscribeNavigation } from './nav';
 
 const path = ref(window.location.pathname || '/login');
 
 function syncPath() {
   const nextPath = window.location.pathname || '/login';
-  if (!isLoggedIn() && nextPath !== '/login') {
-    navigate('/login');
+  if (nextPath === '/login') {
+    path.value = '/login';
+    return;
+  }
+  if (!isLoggedIn()) {
+    window.history.replaceState({}, '', '/login');
+    path.value = '/login';
     return;
   }
   path.value = nextPath;
 }
 
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    syncPath();
+  }
+}
+
 onMounted(() => {
   syncPath();
   cleanupNavigationSubscription = subscribeNavigation(syncPath);
+  window.addEventListener('pageshow', syncPath);
+  window.addEventListener('focus', syncPath);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
 });
 
 let cleanupNavigationSubscription: (() => void) | null = null;
 
-onBeforeUnmount(() => cleanupNavigationSubscription?.());
+onBeforeUnmount(() => {
+  cleanupNavigationSubscription?.();
+  window.removeEventListener('pageshow', syncPath);
+  window.removeEventListener('focus', syncPath);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+});
 </script>
