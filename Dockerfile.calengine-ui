@@ -1,0 +1,21 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+COPY services/ui/package.json services/ui/package-lock.json ./
+RUN npm ci
+
+COPY services/ui/ ./
+
+RUN npm run build
+
+FROM nginx:alpine
+
+COPY services/ui/nginx.conf.template /etc/nginx/templates/default.conf.template
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+ENV PORT=8080
+
+EXPOSE 8080
+
+CMD ["nginx", "-g", "daemon off;"]
