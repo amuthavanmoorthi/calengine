@@ -25,10 +25,6 @@ function syncPath() {
     navigate('/login');
     return;
   }
-  if (isLoggedIn() && nextPath === '/login') {
-    navigate('/dashboard');
-    return;
-  }
   path.value = nextPath;
 }
 
