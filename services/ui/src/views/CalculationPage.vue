@@ -36,166 +36,379 @@
             </span>
             <div>
               <h2>{{ t('輸入參數', 'Input Parameters') }}</h2>
-              <p>{{ t('設定基礎輸入、分支選擇與附加檢核。', 'Configure base input, branch selection, and optional checks.') }}</p>
+              <p>{{ t('依 BERSn 2024 手冊第三章步驟順序設定參數。', 'Follow BERSn 2024 Manual Chapter 3 step order to configure parameters.') }}</p>
             </div>
           </div>
 
+          <!-- Legend -->
+          <div class="calc-legend">
+            <span class="badge badge--lookup">{{ t('查表值', 'Lookup') }}</span> {{ t('由標準表格查取，系統自動填入', 'From standard table, auto-filled') }}
+            &nbsp;|&nbsp;
+            <span class="badge badge--manual">{{ t('手動輸入', 'Manual') }}</span> {{ t('需使用者自行填寫', 'User must enter') }}
+            &nbsp;|&nbsp;
+            <span class="badge badge--calc">{{ t('計算結果', 'Calculated') }}</span> {{ t('由公式推導，不可手動改', 'Derived from formula') }}
+          </div>
+
           <div class="calc-form-grid">
+
+          <!-- ── STEP 1: Basics ── -->
+          <div class="calc-step-header">
+            <span class="calc-step-num">Step 1–2</span>
+            <span>{{ t('地區 / 用途 / 面積', 'Region / Use Category / Floor Area') }}</span>
+          </div>
           <div class="field-grid">
             <label class="field">
-              <span>{{ t('分支類型', 'Branch') }}</span>
+              <span>{{ t('分支類型', 'Branch Type') }}</span>
               <select v-model="form.branchType">
-                <option value="general">{{ t('一般建築', 'General') }}</option>
-                <option value="hotwater">{{ t('中央熱水', 'Hot Water') }}</option>
+                <option value="general">{{ t('一般建築', 'General Building') }}</option>
+                <option value="hotwater">{{ t('含中央熱水系統', 'With Central Hot Water') }}</option>
               </select>
+              <small class="field-help">{{ t('含中央熱水時啟用 §3-3-2 HpEUI 計算。', 'Enables §3-3-2 HpEUI calculation when central hot water exists.') }}</small>
             </label>
 
             <label class="field">
-              <span>{{ t('效率來源', 'Efficiency Source') }}</span>
+              <span>{{ t('效率輸入模式', 'Efficiency Input Mode') }}</span>
               <select v-model="form.efficiencyMode">
-                <option value="manual">{{ t('手動輸入（提供 EEV/EAC/EL）', 'Manual (provide EEV/EAC/EL)') }}</option>
-                <option value="auto">{{ t('DB/JSON 後端計算', 'DB/JSON-driven (compute in backend)') }}</option>
+                <option value="manual">{{ t('手動輸入（直接給 EEV/EAC/EL）', 'Manual — provide EEV/EAC/EL directly') }}</option>
+                <option value="auto">{{ t('DB/JSON 後端計算（附錄二查表）', 'DB/JSON — backend computes from Appendix 2 tables') }}</option>
               </select>
+              <small class="field-help">
+                <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                {{ t('選「手動」時您直接給定EEV/EAC/EL值。選「DB/JSON」時後端依附錄二公式計算。', 'Manual: you supply EEV/EAC/EL. DB/JSON: backend computes from Appendix 2.') }}
+              </small>
             </label>
 
             <label class="field">
-              <span>{{ t('建築類型', 'Building Type') }}</span>
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('Step 2 — 建築用途類別', 'Step 2 — Building Use Category') }}
+              </span>
               <select v-model="form.buildingType">
-                <option value="office">{{ t('辦公', 'Office') }}</option>
-                <option value="retail">{{ t('零售', 'Retail') }}</option>
-                <option value="education">{{ t('教育', 'Education') }}</option>
-                <option value="hotel">{{ t('旅館', 'Hotel') }}</option>
+                <option
+                  v-for="category in bersUseCategories"
+                  :key="category.id"
+                  :value="category.id"
+                  :disabled="category.status === 'pending_crosswalk'"
+                >
+                  {{ t(category.labelZh, category.labelEn) }}{{ category.status === 'pending_crosswalk' ? t('（待對照）', ' (pending crosswalk)') : '' }}
+                </option>
               </select>
+              <small class="field-help">
+                {{ selectedUseCategory?.status === 'pending_crosswalk'
+                  ? t('此類別尚缺附錄一基準對照，需補齊後才能正式計算。', 'This category still needs Appendix 1 baseline crosswalk before formal calculation.')
+                  : t('查 BERSn 2024 附錄一與表 3.2 → 自動取得 AEUI、LEUI、EEUI。', 'Looked up from BERSn 2024 Appendix 1 + Table 3.2 → auto-fills AEUI, LEUI, EEUI.') }}
+              </small>
             </label>
 
             <label class="field">
-              <span>{{ t('總樓地板面積 (m²)', 'Total Floor Area (m²)') }}</span>
-              <input v-model.number="form.totalFloorArea" type="number" min="1" />
+              <span>
+                <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                {{ t('Step 3 — 總樓地板面積 AF (m²)', 'Step 3 — Total Floor Area AF (m²)') }}
+              </span>
+              <input v-model.number="form.totalFloorArea" type="number" min="1" step="0.1" />
+              <small class="field-help">{{ t('依建築執照圖面填入，§3-1-1。AFe = AF − 排除面積。', 'From building permit drawings, §3-1-1. AFe = AF − excluded areas.') }}</small>
             </label>
 
             <label class="field">
-              <span>{{ t('排除面積 (m²)', 'Excluded Area (m²)') }}</span>
-              <input v-model.number="form.excludedArea" type="number" min="0" />
+              <span>
+                <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                {{ t('Step 3.1 — 免評估分區面積 AFk (m²)', 'Step 3.1 — Exempt Zone Area AFk (m²)') }}
+              </span>
+              <input v-model.number="form.excludedArea" type="number" min="0" step="0.1" />
+              <small class="field-help">{{ t('室外樓地板、防空避難、停車場、無空調儲藏室≥100m²，§3-1-2。', 'Outdoor, civil defense, parking, storage ≥100m² w/o AC, §3-1-2.') }}</small>
             </label>
+          </div>
 
+          <!-- ── STEP 2: EUI Baselines (lookup from building type) ── -->
+          <div class="calc-step-header">
+            <span class="calc-step-num">Step 2</span>
+            <span>{{ t('EUI 基準值（查表 3-2）', 'EUI Baselines (Table 3-2 Lookup)') }}</span>
+          </div>
+          <div class="field-grid">
             <label class="field">
-              <span>{{ t('電梯台數 (Nej)', 'Elevator Count (Nej)') }}</span>
-              <input v-model.number="form.elevatorCount" type="number" min="1" />
-            </label>
-
-            <label class="field">
-              <span>Eelj</span>
-              <input v-model.number="form.eelj" type="number" min="0" step="0.01" />
-            </label>
-
-            <label class="field">
-              <span>YOHj</span>
-              <input v-model.number="form.yohj" type="number" min="0" />
-            </label>
-
-            <label class="field">
-              <span>AEUI</span>
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('空調基準能耗 AEUI (kWh/m²·yr)', 'HVAC Baseline AEUI (kWh/m²·yr)') }}
+              </span>
               <input v-model.number="form.aeui" type="number" min="0" step="0.01" />
+              <small class="field-help">{{ t('由建築類型自動查表 3-2 取得，一般無需手動修改。', 'Auto-retrieved from Table 3-2 by building type. Do not modify unless overriding.') }}</small>
             </label>
 
             <label class="field">
-              <span>LEUI</span>
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('照明基準能耗 LEUI (kWh/m²·yr)', 'Lighting Baseline LEUI (kWh/m²·yr)') }}
+              </span>
               <input v-model.number="form.leui" type="number" min="0" step="0.01" />
+              <small class="field-help">{{ t('由建築類型自動查表 3-2 取得。', 'Auto-retrieved from Table 3-2 by building type.') }}</small>
             </label>
 
             <label class="field">
-              <span>EEUI</span>
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('設備基準能耗 EEUI (kWh/m²·yr)', 'Equipment Baseline EEUI (kWh/m²·yr)') }}
+              </span>
               <input v-model.number="form.eeui" type="number" min="0" step="0.01" />
+              <small class="field-help">{{ t('由建築類型自動查表 3-2 取得。', 'Auto-retrieved from Table 3-2 by building type.') }}</small>
             </label>
 
             <label class="field">
-              <span>UR</span>
-              <input v-model.number="form.ur" type="number" min="0" max="1" step="0.01" />
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('Step 1 — 地區係數 UR', 'Step 1 — Regional Factor UR') }}
+              </span>
+              <input v-model.number="form.ur" type="number" min="0" max="2" step="0.01" />
+              <small class="field-help">{{ t('由地理分區查附錄一表A取得（A區=1.0, B區=0.95, …）。', 'From Appendix 1 Table A by climate region (Zone A=1.0, B=0.95, …).') }}</small>
             </label>
+          </div>
 
-            <template v-if="form.efficiencyMode === 'manual'">
+          <!-- ── STEP 3: Manual mode EEV/EAC/EL ── -->
+          <template v-if="form.efficiencyMode === 'manual'">
+          <div class="calc-step-header">
+            <span class="calc-step-num">Step 4–9</span>
+            <span>{{ t('手動輸入模式 — 直接給定效率指標', 'Manual Mode — Provide efficiency indicators directly') }}</span>
+          </div>
+          <div class="field-grid">
               <label class="field">
-                <span>EAC</span>
-                <input v-model.number="form.eac" type="number" min="0" step="0.01" />
+                <span>
+                  <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                  {{ t('Step 7 — 外殼效率指標 EEV', 'Step 7 — Envelope Efficiency Value EEV') }}
+                </span>
+                <input v-model.number="form.eev" type="number" min="0" max="5" step="0.001" />
+                <small class="field-help">{{ t('公式: EEV=Σ(Uaw×Aaw+Ui×ηi×Ki×Aaf+Uar×Aar)/(ΣA)，附錄二公式1–5。', 'Formula: EEV=Σ(Uaw×Aaw+Ui×ηi×Ki×Aaf+Uar×Aar)/(ΣA), Appendix 2 Formulas 1–5.') }}</small>
               </label>
               <label class="field">
-                <span>EEV</span>
-                <input v-model.number="form.eev" type="number" min="0" step="0.01" />
+                <span>
+                  <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                  {{ t('Step 8 — 空調效率指標 EAC', 'Step 8 — HVAC Efficiency Coefficient EAC') }}
+                </span>
+                <input v-model.number="form.eac" type="number" min="0" max="2" step="0.01" />
+                <small class="field-help">{{ t('中央空調: 1−(BW×HT×Arx)；個別: 0.9×(1−Arx)。附錄二公式15–16b。', 'Central: 1−(BW×HT×Arx); Individual: 0.9×(1−Arx). Appendix 2 Formulas 15–16b.') }}</small>
               </label>
               <label class="field">
-                <span>EL</span>
-                <input v-model.number="form.el" type="number" min="0" step="0.01" />
+                <span>
+                  <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                  {{ t('Step 9 — 照明效率指標 EL', 'Step 9 — Lighting Efficiency Coefficient EL') }}
+                </span>
+                <input v-model.number="form.el" type="number" min="0" max="2" step="0.01" />
+                <small class="field-help">{{ t('公式: EL=β×(LPD設計/LPD基準)，β查表10，LPD基準查表11。', 'Formula: EL=β×(LPD_design/LPD_base), β from Table 10, LPD_base from Table 11.') }}</small>
               </label>
-            </template>
+          </div>
+          </template>
 
+          <!-- ── STEP 4-9: MEP Coefficients (always needed) ── -->
+          <div class="calc-step-header">
+            <span class="calc-step-num">Step 8–10</span>
+            <span>{{ t('MEP 效率係數（Es / Et / β₁ / CFn）', 'MEP Efficiency Coefficients (Es / Et / β₁ / CFn)') }}</span>
+          </div>
+          <div class="field-grid">
             <label class="field">
-              <span>Es</span>
-              <input v-model.number="form.es" type="number" min="0" step="0.01" />
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('外殼-空調交互係數 Es (表 3-2)', 'Envelope-HVAC Interaction Factor Es (Table 3-2)') }}
+              </span>
+              <input v-model.number="form.es" type="number" min="0" max="3" step="0.01" />
+              <small class="field-help">{{ t('由建築類型查表3-2取得，用於EEI公式中a×(EAC−EEV×Es)。', 'From building type in Table 3-2. Used in EEI formula: a×(EAC−EEV×Es).') }}</small>
             </label>
 
             <label class="field">
-              <span>Et</span>
-              <input v-model.number="form.et" type="number" min="0" step="0.01" />
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('Step 10 — 電梯效率係數 Et', 'Step 10 — Elevator Efficiency Factor Et') }}
+              </span>
+              <input v-model.number="form.et" type="number" min="0" max="2" step="0.01" />
+              <small class="field-help">{{ t('ACVV=1.0, VVVF齒輪=0.6, VVVF永磁=0.5, 回生=0.4。§3-3-1。', 'ACVV=1.0, VVVF gear=0.6, VVVF perm=0.5, Regen=0.4. §3-3-1.') }}</small>
             </label>
 
             <label class="field">
-              <span>beta1</span>
-              <input v-model.number="form.beta1" type="number" min="0.0001" step="0.001" />
+              <span>
+                <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                {{ t('Step 10 — 電梯台數 Nej', 'Step 10 — Elevator Count Nej') }}
+              </span>
+              <input v-model.number="form.elevatorCount" type="number" min="1" max="100" step="1" />
+              <small class="field-help">{{ t('建築內電梯總台數，用於 EtEUI=0.6×Σ(Nej×Eelj×YOHj)/AFe。', 'Total elevator count. Used in EtEUI=0.6×Σ(Nej×Eelj×YOHj)/AFe.') }}</small>
             </label>
 
             <label class="field">
-              <span>CFn</span>
-              <input v-model.number="form.cfn" type="number" min="0.0001" step="0.01" />
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('電梯單位能耗 Eelj (kWh/台·hr) [表 3-1]', 'Elevator Unit Energy Eelj (kWh/car·hr) [Table 3-1]') }}
+              </span>
+              <input v-model.number="form.eelj" type="number" min="0" max="10" step="0.01" />
+              <small class="field-help">{{ t('由電梯類型+容量查表3-1取得參考值，可依實際規格調整。', 'Reference value from Table 3-1 by elevator type + capacity. Adjust to actual specs.') }}</small>
+            </label>
+
+            <label class="field">
+              <span>
+                <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                {{ t('年運轉時數 YOHj (hr/年)', 'Annual Operating Hours YOHj (hr/yr)') }}
+              </span>
+              <input v-model.number="form.yohj" type="number" min="0" max="8760" step="1" />
+              <small class="field-help">{{ t('電梯年實際運轉時數，依建築使用特性評估。一般辦公約 2500–3500 hr/yr。', 'Annual elevator operation hours. Typical office: 2500–3500 hr/yr.') }}</small>
+            </label>
+
+            <label class="field">
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('Step 9 — 照明管理係數 β₁ (表 10)', 'Step 9 — Lighting Management Factor β₁ (Table 10)') }}
+              </span>
+              <input v-model.number="form.beta1" type="number" min="0.0001" max="1.0" step="0.001" />
+              <small class="field-help">{{ t('BEMS整合=0.75, 調光=0.80, 自動點滅=0.90, 合理迴路=0.95, 無=1.0。附錄二表10。', 'BEMS=0.75, Dimming=0.80, Auto=0.90, Circuit=0.95, None=1.0. Appendix 2 Table 10.') }}</small>
+            </label>
+
+            <label class="field">
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('碳排放係數 CFn (kgCO₂/kWh)', 'Carbon Emission Factor CFn (kgCO₂/kWh)') }}
+              </span>
+              <input v-model.number="form.cfn" type="number" min="0.0001" max="2.0" step="0.01" />
+              <small class="field-help">{{ t('台灣電網排放係數，依台電年度公告值填入（約 0.509 kgCO₂/kWh）。', 'Taiwan grid emission factor per Taipower annual announcement (approx 0.509 kgCO₂/kWh).') }}</small>
             </label>
           </div>
 
           <div v-if="form.efficiencyMode === 'auto'" class="calc-subsection">
-            <h3>{{ t('DB/JSON 後端效率輸入', 'DB/JSON-driven Efficiency Inputs') }}</h3>
-            <p class="hint">{{ t('供後端預處理使用，用以計算 EEV / EAC / EL。', 'Used by backend preprocessing to compute EEV/EAC/EL from Appendix 2 + JSON tables.') }}</p>
+            <div class="calc-step-header">
+              <span class="calc-step-num">Step 4–7</span>
+              <span>{{ t('DB/JSON 後端計算 — 外殼與MEP參數', 'DB/JSON Backend — Envelope & MEP Parameters') }}</span>
+            </div>
+            <p class="hint">{{ t('以下參數由後端依附錄二公式計算 EEV / EAC / EL，無需手動給定效率值。', 'Backend computes EEV/EAC/EL from Appendix 2 formulas using the inputs below.') }}</p>
+
+            <!-- Step 4: Envelope -->
+            <h4 class="calc-subsection-label">{{ t('Step 4–7：外殼參數（EEV計算依據）', 'Steps 4–7: Envelope Parameters (for EEV calculation)') }}</h4>
             <div class="field-grid">
               <label class="field">
-                <span>EV</span>
-                <input v-model.number="form.ev" type="number" min="0" />
+                <span>
+                  <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                  {{ t('外牆面積 Aaw (m²)', 'Wall Area Aaw (m²)') }}
+                </span>
+                <input v-model.number="form.wallArea" type="number" min="1" step="0.1" />
+                <small class="field-help">{{ t('外牆總面積（扣除窗戶），由建築圖面量取。', 'Total opaque wall area (excl. windows), from building drawings.') }}</small>
               </label>
-            <label class="field">
-              <span>{{ t('海拔高度 (m)', 'Altitude (m)') }}</span>
-              <input v-model.number="form.altitudeM" type="number" min="0" />
-            </label>
-            <label class="field">
-              <span>{{ t('氣候分區', 'Climate Zone') }}</span>
-              <select v-model="form.climateZone">
-                <option value="SOUTH">SOUTH</option>
-                <option value="NORTH">NORTH</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>{{ t('建築群組', 'Building Group') }}</span>
-              <input v-model="form.buildingGroup" type="text" />
-            </label>
-            <label class="field">
-              <span>{{ t('外牆面積', 'Wall Area') }}</span>
-              <input v-model.number="form.wallArea" type="number" min="1" />
-            </label>
-            <label class="field">
-              <span>{{ t('窗戶面積', 'Window Area') }}</span>
-              <input v-model.number="form.windowArea" type="number" min="0" />
-            </label>
-            <label class="field">
-              <span>{{ t('EAC 計算方法', 'EAC Method') }}</span>
-              <select v-model="form.eacMethod">
-                  <option value="central_le_50">central_le_50</option>
-                  <option value="central_gt_50">central_gt_50</option>
-                  <option value="noncentral_chiller">noncentral_chiller</option>
+              <label class="field">
+                <span>
+                  <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                  {{ t('窗戶面積 Aaf (m²)', 'Window Area Aaf (m²)') }}
+                </span>
+                <input v-model.number="form.windowArea" type="number" min="0" step="0.1" />
+                <small class="field-help">{{ t('全棟窗戶面積總和。WWR = Aaf/(Aaw+Aaf)。', 'Total window area. WWR = Aaf/(Aaw+Aaf).') }}</small>
+              </label>
+              <label class="field">
+                <span>
+                  <span class="badge badge--calc">{{ t('計算', 'Calculated') }}</span>
+                  {{ t('海拔高度 (m)', 'Altitude (m)') }}
+                </span>
+                <input v-model.number="form.altitudeM" type="number" min="0" max="4000" step="1" />
+                <small class="field-help">{{ t('建築基地海拔，影響EVc/EVmin合規門檻（附錄二表1）。', 'Site altitude — affects EVc/EVmin compliance thresholds (Appendix 2 Table 1).') }}</small>
+              </label>
+              <label class="field">
+                <span>
+                  <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                  {{ t('Step 1 — 氣候分區', 'Step 1 — Climate Zone') }}
+                </span>
+                <select v-model="form.climateZone">
+                  <option value="SOUTH">{{ t('南部 SOUTH', 'SOUTH') }}</option>
+                  <option value="NORTH">{{ t('北部 NORTH', 'NORTH') }}</option>
                 </select>
+                <small class="field-help">{{ t('影響窗平均熱傳透率 UAF 門檻值（附錄二表1）。', 'Affects window UAF threshold (Appendix 2 Table 1).') }}</small>
               </label>
+              <label class="field">
+                <span>
+                  <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                  {{ t('建築群組 (用於EV查表)', 'Building Group (for EV table lookup)') }}
+                </span>
+                <input v-model="form.buildingGroup" type="text" placeholder="e.g. general_commercial" />
+                <small class="field-help">{{ t('用於查對應 EV 基準值，依建築主要用途決定。', 'Used to look up EV baseline value by primary building use.') }}</small>
+              </label>
+              <label class="field">
+                <span>EV</span>
+                <input v-model.number="form.ev" type="number" min="0" step="0.001" />
+                <small class="field-help">{{ t('外殼效能值 EV，通常由後端依 WWR 及構造查表計算。', 'Envelope performance value EV, usually backend-computed from WWR and constructions.') }}</small>
+              </label>
+            </div>
+
+            <!-- Step 8: HVAC -->
+            <h4 class="calc-subsection-label">{{ t('Step 8：空調系統（EAC計算方法）', 'Step 8: HVAC System (EAC calculation method)') }}</h4>
+            <div class="field-grid">
             <label class="field">
-              <span>{{ t('EL 分子總和', 'EL numerator total') }}</span>
-              <input v-model.number="form.elNumeratorTotal" type="number" min="0" />
+              <span>
+                <span class="badge badge--lookup">{{ t('查表', 'Lookup') }}</span>
+                {{ t('EAC 計算方法（附錄二§4）', 'EAC Calculation Method (Appendix 2 §4)') }}
+              </span>
+              <select v-model="form.eacMethod">
+                  <option value="central_le_50">{{ t('中央空調 ≤50USRT (公式15)', 'Central AC ≤50USRT (Formula 15)') }}</option>
+                  <option value="central_gt_50">{{ t('中央空調 >50USRT (公式14)', 'Central AC >50USRT (Formula 14)') }}</option>
+                  <option value="noncentral_chiller">{{ t('個別空調 (公式16b)', 'Individual AC (Formula 16b)') }}</option>
+                </select>
+              <small class="field-help">{{ t('EAC 公式依空調類型及規模選擇，中央≤50USRT用公式15，個別用16b。', 'Select EAC formula by AC type: central ≤50USRT=Formula 15, individual=16b.') }}</small>
+              </label>
+            </div>
+
+            <!-- Step 9: Lighting -->
+            <h4 class="calc-subsection-label">{{ t('Step 9：照明系統（EL計算）', 'Step 9: Lighting System (EL calculation)') }}</h4>
+            <div class="field-grid">
+            <label class="field">
+              <span>
+                <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                {{ t('EL 分子 Σ(β×LPD設計×A)', 'EL Numerator Σ(β×LPD_design×A)') }}
+              </span>
+              <input v-model.number="form.elNumeratorTotal" type="number" min="0" step="0.01" />
+              <small class="field-help">{{ t('各空間 β×LPD設計×面積 之總和（W）。附錄二公式17。', 'Sum of β×LPD_design×area for each space (W). Appendix 2 Formula 17.') }}</small>
             </label>
             <label class="field">
-              <span>{{ t('EL 分母總和', 'EL denominator total') }}</span>
-              <input v-model.number="form.elDenominatorTotal" type="number" min="1" />
+              <span>
+                <span class="badge badge--manual">{{ t('手動', 'Manual') }}</span>
+                {{ t('EL 分母 Σ(LPD基準×A)', 'EL Denominator Σ(LPD_baseline×A)') }}
+              </span>
+              <input v-model.number="form.elDenominatorTotal" type="number" min="1" step="0.01" />
+              <small class="field-help">{{ t('各空間 LPD基準×面積 之總和（W），LPD基準查表11。', 'Sum of LPD_baseline×area (W). LPD baseline from Table 11.') }}</small>
             </label>
+            </div>
+
+            <!-- Item 8 Fix: Custom wall/roof construction with k-value + thickness -->
+            <h4 class="calc-subsection-label">{{ t('Step 4–5：自訂外牆/屋頂構造（k值＋厚度計算U值）', 'Steps 4–5: Custom Wall/Roof Construction (k-value + thickness → U-value)') }}</h4>
+            <p class="hint">
+              {{ t('公式：U = 1 / (Ri + Σ(d_i / λ_i) + Ro)', 'Formula: U = 1 / (Ri + Σ(d_i / λ_i) + Ro)') }}
+              &nbsp;|&nbsp;
+              {{ t('Ri（內表面熱阻）：外牆=0.11，屋頂=0.10 m²·K/W；Ro=0.04 m²·K/W', 'Ri (internal): wall=0.11, roof=0.10 m²·K/W; Ro=0.04 m²·K/W') }}
+            </p>
+
+            <div class="field-grid" style="margin-bottom:8px">
+              <label class="field">
+                <span>{{ t('外牆 Ri (m²·K/W)', 'Wall Ri (m²·K/W)') }}</span>
+                <input v-model.number="form.customWallRi" type="number" min="0.01" max="0.5" step="0.01" :placeholder="'0.11'" />
+              </label>
+              <label class="field">
+                <span>{{ t('外牆 Ro (m²·K/W)', 'Wall Ro (m²·K/W)') }}</span>
+                <input v-model.number="form.customWallRo" type="number" min="0.01" max="0.5" step="0.01" :placeholder="'0.04'" />
+              </label>
+            </div>
+
+            <div v-for="(layer, idx) in form.customWallLayers" :key="'wl'+idx" class="field-grid field-layer-row">
+              <label class="field">
+                <span>{{ t('外牆層', 'Wall Layer') }} {{ idx+1 }} — {{ t('材料', 'Material') }}</span>
+                <input v-model="layer.material" type="text" :placeholder="t('例：RC混凝土', 'e.g. Reinforced Concrete')" />
+              </label>
+              <label class="field">
+                <span>{{ t('厚度 d (mm)', 'Thickness d (mm)') }}</span>
+                <input v-model.number="layer.thicknessMm" type="number" min="1" max="2000" step="1" />
+              </label>
+              <label class="field">
+                <span>{{ t('導熱係數 λ (W/m·K)', 'Conductivity λ (W/m·K)') }}</span>
+                <input v-model.number="layer.lambdaWmK" type="number" min="0.001" max="100" step="0.001" />
+              </label>
+              <label class="field field--inline">
+                <span>{{ t('R_i = d/λ (m²·K/W)', 'R_i = d/λ (m²·K/W)') }}</span>
+                <span class="badge badge--calc">{{ layer.thicknessMm && layer.lambdaWmK ? ((layer.thicknessMm/1000)/layer.lambdaWmK).toFixed(4) : '—' }}</span>
+                <button type="button" class="btn-remove-layer" @click="form.customWallLayers.splice(idx,1)">✕</button>
+              </label>
+            </div>
+            <div class="field-layer-actions">
+              <button type="button" class="calc-btn-sm" @click="form.customWallLayers.push({material:'',thicknessMm:100,lambdaWmK:1.0})">
+                + {{ t('新增外牆材料層', 'Add Wall Layer') }}
+              </button>
+              <span class="badge badge--calc" v-if="customWallU !== null">
+                {{ t('計算 U 值', 'Calculated U') }} = {{ customWallU.toFixed(4) }} W/m²·K
+              </span>
             </div>
           </div>
 
@@ -380,7 +593,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import { logout } from '../auth';
 import LanguageToggle from '../components/LanguageToggle.vue';
 import { useI18n } from '../i18n';
@@ -393,6 +606,47 @@ import { navigate } from '../nav';
 const API_BASE_URL = (import.meta.env.VITE_API_URL as string | undefined) || 'http://localhost:8080';
 const { t } = useI18n();
 
+type BersUseCategory = {
+  id: string;
+  labelZh: string;
+  labelEn: string;
+  appendix1Code: string | null;
+  calcBuildingType: string;
+  hotwaterCategory: string | null;
+  status: 'ready' | 'pending_crosswalk';
+  table32Label: string;
+};
+
+const bersUseCategories: BersUseCategory[] = [
+  { id: 'A1_ASSEMBLY_PERFORMANCE', labelZh: 'A-1 集會表演', labelEn: 'A-1 Assembly / Performance', appendix1Code: 'A1', calcBuildingType: 'A1', hotwaterCategory: null, status: 'ready', table32Label: 'A-1 之集會表演' },
+  { id: 'A1_SPORTS_SPECIAL_VENUE', labelZh: 'A-1 體育專用場館', labelEn: 'A-1 Sports Special Venue', appendix1Code: 'A1', calcBuildingType: 'A1', hotwaterCategory: null, status: 'ready', table32Label: 'A-1 之體育專用場館' },
+  { id: 'A2_INTERNATIONAL_TERMINAL', labelZh: 'A-2 國際航站', labelEn: 'A-2 International Terminal', appendix1Code: 'A2', calcBuildingType: 'A2', hotwaterCategory: null, status: 'ready', table32Label: 'A-2 之國際航站' },
+  { id: 'A2_STATION_PORT_DOMESTIC_TERMINAL', labelZh: 'A-2 車站、船站、國內航站', labelEn: 'A-2 Station / Port / Domestic Terminal', appendix1Code: 'A2', calcBuildingType: 'A2', hotwaterCategory: null, status: 'ready', table32Label: 'A-2 車站、船站、國內航站' },
+  { id: 'B1_ENTERTAINMENT', labelZh: 'B-1 娛樂場所', labelEn: 'B-1 Entertainment', appendix1Code: 'B1', calcBuildingType: 'B1', hotwaterCategory: null, status: 'ready', table32Label: 'B-1 娛樂場所' },
+  { id: 'B2_DEPARTMENT_STORE', labelZh: 'B-2 商場百貨', labelEn: 'B-2 Department Store / Mall', appendix1Code: 'B2', calcBuildingType: 'B2', hotwaterCategory: null, status: 'ready', table32Label: 'B-2 商場百貨' },
+  { id: 'B3_RESTAURANT', labelZh: 'B-3 餐飲場所', labelEn: 'B-3 Restaurant', appendix1Code: null, calcBuildingType: 'B3', hotwaterCategory: null, status: 'pending_crosswalk', table32Label: 'B-3 餐飲場所' },
+  { id: 'B4_HOTEL', labelZh: 'B-4 旅館', labelEn: 'B-4 Hotel', appendix1Code: null, calcBuildingType: 'HOTEL', hotwaterCategory: 'hotel', status: 'pending_crosswalk', table32Label: 'B-4 旅館' },
+  { id: 'C2_FACTORY_CLEAN_PRODUCTION', labelZh: 'C-2 清潔生產工廠', labelEn: 'C-2 Factory, Clean Production', appendix1Code: 'C2', calcBuildingType: 'C2', hotwaterCategory: null, status: 'ready', table32Label: 'C-2 之有清潔生產之工廠' },
+  { id: 'C2_FACTORY_GENERAL_PRODUCTION', labelZh: 'C-2 一般生產工廠', labelEn: 'C-2 Factory, General Production', appendix1Code: 'C2', calcBuildingType: 'C2', hotwaterCategory: null, status: 'ready', table32Label: 'C-2 之一般生產之工廠' },
+  { id: 'D1_FITNESS_LEISURE', labelZh: 'D-1 健身休閒', labelEn: 'D-1 Fitness / Leisure', appendix1Code: 'D1', calcBuildingType: 'D1', hotwaterCategory: 'fitness_leisure', status: 'ready', table32Label: 'D-1 之健身休閒' },
+  { id: 'D1_SPORTS_SPECIAL_VENUE', labelZh: 'D-1 體育專用場館', labelEn: 'D-1 Sports Special Venue', appendix1Code: 'D1', calcBuildingType: 'D1', hotwaterCategory: null, status: 'ready', table32Label: 'D-1 之體育專用場館' },
+  { id: 'D2_EDUCATION_CULTURE', labelZh: 'D-2 文教設施', labelEn: 'D-2 Education / Culture', appendix1Code: 'D2', calcBuildingType: 'D2', hotwaterCategory: null, status: 'ready', table32Label: 'D-2 之文教設施' },
+  { id: 'D2_SPECIAL_FUNCTION_VENUE', labelZh: 'D-2 特殊功能場館', labelEn: 'D-2 Special Function Venue', appendix1Code: 'D2', calcBuildingType: 'D2', hotwaterCategory: null, status: 'ready', table32Label: 'D-2 之特殊功能場館' },
+  { id: 'D3_D4_TEACHING_OFFICE_BUILDING', labelZh: 'D-3/D-4 教學辦公樓', labelEn: 'D-3/D-4 Teaching Office Building', appendix1Code: 'D3', calcBuildingType: 'D3', hotwaterCategory: null, status: 'ready', table32Label: 'D-3&D-4 之教學辦公公樓' },
+  { id: 'D3_TYPE_B_CLASSROOM', labelZh: 'D-3 乙教室', labelEn: 'D-3 Type B Classroom', appendix1Code: 'D3', calcBuildingType: 'D3', hotwaterCategory: null, status: 'ready', table32Label: 'D-3 乙教室' },
+  { id: 'D4_TYPE_B_CLASSROOM', labelZh: 'D-4 乙教室', labelEn: 'D-4 Type B Classroom', appendix1Code: 'D4', calcBuildingType: 'D4', hotwaterCategory: null, status: 'ready', table32Label: 'D-4 乙教室' },
+  { id: 'D5_AFTERSCHOOL_CARE', labelZh: 'D-5 補教課後照顧機構', labelEn: 'D-5 Afterschool Care', appendix1Code: null, calcBuildingType: 'D5', hotwaterCategory: null, status: 'pending_crosswalk', table32Label: 'D-5 補教課後照顧機構' },
+  { id: 'E_RELIGION_FUNERAL', labelZh: 'E 宗教殯儀設施', labelEn: 'E Religion / Funeral Facility', appendix1Code: null, calcBuildingType: 'E', hotwaterCategory: null, status: 'pending_crosswalk', table32Label: 'E 宗教殯儀設施' },
+  { id: 'F1_DAYCARE_MEDICAL_CARE', labelZh: 'F-1 醫療照護（日照）', labelEn: 'F-1 Medical Care, Daycare', appendix1Code: 'F1', calcBuildingType: 'F1', hotwaterCategory: null, status: 'ready', table32Label: 'F-1 乙醫療照護(日照)' },
+  { id: 'F1_HOSPITAL_LONG_TERM_CARE', labelZh: 'F-1 醫療照護（醫院、長照）', labelEn: 'F-1 Hospital / Long-Term Care', appendix1Code: 'F1', calcBuildingType: 'F1', hotwaterCategory: 'long_term_care', status: 'ready', table32Label: 'F-1 乙醫療照護(醫院、長照)' },
+  { id: 'F2_SMALL_CARE_TRAINING', labelZh: 'F-2 小型照護訓練機構', labelEn: 'F-2 Small Care / Training Institution', appendix1Code: 'F2', calcBuildingType: 'F2', hotwaterCategory: null, status: 'ready', table32Label: 'F-2 小型照護訓練機構' },
+  { id: 'F3_CHILD_YOUTH_INSTITUTION', labelZh: 'F-3 兒少機構', labelEn: 'F-3 Child / Youth Institution', appendix1Code: null, calcBuildingType: 'F3', hotwaterCategory: null, status: 'pending_crosswalk', table32Label: 'F-3 兒少機構' },
+  { id: 'G1_FINANCE_SECURITIES', labelZh: 'G-1 金融證券', labelEn: 'G-1 Finance / Securities', appendix1Code: 'G1', calcBuildingType: 'G1', hotwaterCategory: null, status: 'ready', table32Label: 'G-1 金融證券' },
+  { id: 'G2_OFFICE', labelZh: 'G-2 辦公場所', labelEn: 'G-2 Office', appendix1Code: 'G2', calcBuildingType: 'G2', hotwaterCategory: null, status: 'ready', table32Label: 'G-2 辦公場所' },
+  { id: 'G3_OUTPATIENT_RETAIL_SERVICE', labelZh: 'G-3 門診零售服務', labelEn: 'G-3 Outpatient / Retail Service', appendix1Code: null, calcBuildingType: 'G3', hotwaterCategory: null, status: 'pending_crosswalk', table32Label: 'G-3 門診零售服務' },
+  { id: 'H1_H2_NON_RESIDENTIAL', labelZh: 'H-1/H-2 非住宅用途', labelEn: 'H-1/H-2 Non-Residential Use', appendix1Code: 'H1', calcBuildingType: 'H1', hotwaterCategory: 'dormitory', status: 'ready', table32Label: 'H-1 及 H-2(住宅、集合住宅除外)' },
+];
+
 type EvidenceCall = {
   name: string;
   method: 'GET' | 'POST';
@@ -402,10 +656,16 @@ type EvidenceCall = {
   responseBody: unknown;
 };
 
+interface MaterialLayer {
+  material: string;
+  thicknessMm: number;
+  lambdaWmK: number;
+}
+
 const form = reactive({
   branchType: 'general',
   efficiencyMode: 'manual',
-  buildingType: 'office',
+  buildingType: 'G2_OFFICE',
   totalFloorArea: 12000,
   excludedArea: 1800,
   elevatorCount: 4,
@@ -441,12 +701,49 @@ const form = reactive({
   geOverride: 50000,
   enableNZB: false,
   tge: 600000,
+  // ── Item 8: Custom wall construction (k-value + thickness) ──
+  customWallRi: 0.11,   // Internal surface resistance (wall)
+  customWallRo: 0.04,   // External surface resistance
+  customWallLayers: [
+    { material: 'RC混凝土 / RC Concrete', thicknessMm: 200, lambdaWmK: 1.63 },
+  ] as MaterialLayer[],
+  // ── Custom roof construction ──
+  customRoofRi: 0.10,   // Internal surface resistance (roof, horizontal)
+  customRoofRo: 0.04,
+  customRoofLayers: [
+    { material: '隔熱材 / Insulation', thicknessMm: 80, lambdaWmK: 0.04 },
+    { material: 'RC混凝土板 / RC Slab', thicknessMm: 150, lambdaWmK: 1.63 },
+  ] as MaterialLayer[],
 });
 
 const loading = ref(false);
 const error = ref('');
 const result = ref<any>(null);
 const activePreset = ref<'case1' | 'case2' | 'case3' | 'case4'>('case1');
+const selectedUseCategory = computed(() => (
+  bersUseCategories.find((category) => category.id === form.buildingType) || bersUseCategories.find((category) => category.id === 'G2_OFFICE')
+));
+
+/**
+ * Compute U-value from material layers using ISO 6946:
+ *   U = 1 / (Ri + Σ(d_i / λ_i) + Ro)
+ */
+function calcUFromLayers(layers: MaterialLayer[], ri: number, ro: number): number | null {
+  if (!layers.length) return null;
+  const sumR = layers.reduce((acc, l) => {
+    if (!l.thicknessMm || !l.lambdaWmK) return acc;
+    return acc + (l.thicknessMm / 1000) / l.lambdaWmK;
+  }, 0);
+  const total = ri + sumR + ro;
+  return total > 0 ? 1 / total : null;
+}
+
+const customWallU = computed(() =>
+  calcUFromLayers(form.customWallLayers, form.customWallRi ?? 0.11, form.customWallRo ?? 0.04),
+);
+const customRoofU = computed(() =>
+  calcUFromLayers(form.customRoofLayers, form.customRoofRi ?? 0.10, form.customRoofRo ?? 0.04),
+);
 
 function onLogout() {
   logout();
@@ -564,7 +861,7 @@ async function runCalculation() {
       baseInputs.ev_indicator = 'ENVLOAD';
       baseInputs.EV = form.ev;
       baseInputs.building = {
-        building_type: 'HOTEL',
+        building_type: selectedUseCategory.value?.calcBuildingType || 'G2',
         altitude_m: form.altitudeM,
         climate_zone: form.climateZone,
         UR: form.ur,
@@ -985,6 +1282,12 @@ function downloadEvidence() {
   padding: 0 11px;
   color: #0f172a;
   font-size: var(--text-sm);
+}
+
+.field-help {
+  color: #64748b;
+  font-size: var(--text-xs);
+  line-height: 1.35;
 }
 
 .calc-subsection {
@@ -1498,4 +1801,124 @@ function downloadEvidence() {
     gap: 10px;
   }
 }
+
+/* ── Step headers ── */
+.calc-step-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 8px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #334155;
+  border-left: 3px solid #3b82f6;
+  padding-left: 10px;
+}
+.calc-step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+  padding: 2px 8px;
+  background: #3b82f6;
+  color: #fff;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+.calc-subsection-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  margin: 14px 0 6px;
+  padding: 4px 8px;
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+/* ── Input type badges ── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 12px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+.badge--lookup {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+}
+.badge--manual {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+.badge--calc {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+/* ── Legend ── */
+.calc-legend {
+  font-size: 0.75rem;
+  color: #64748b;
+  padding: 8px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  margin-bottom: 14px;
+}
+
+/* ── Custom layer rows (Fix 8: k-value + thickness) ── */
+.field-layer-row {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+.field-layer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 6px 0 12px;
+}
+.field--inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+.btn-remove-layer {
+  background: #fee2e2;
+  border: none;
+  color: #dc2626;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.btn-remove-layer:hover { background: #fca5a5; }
+.calc-btn-sm {
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #93c5fd;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.calc-btn-sm:hover { background: #dbeafe; }
 </style>
