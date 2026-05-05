@@ -410,6 +410,45 @@
                 {{ t('計算 U 值', 'Calculated U') }} = {{ customWallU.toFixed(4) }} W/m²·K
               </span>
             </div>
+
+            <div class="field-grid" style="margin:12px 0 8px">
+              <label class="field">
+                <span>{{ t('屋頂 Ri (m²·K/W)', 'Roof Ri (m²·K/W)') }}</span>
+                <input v-model.number="form.customRoofRi" type="number" min="0.01" max="0.5" step="0.01" :placeholder="'0.10'" />
+              </label>
+              <label class="field">
+                <span>{{ t('屋頂 Ro (m²·K/W)', 'Roof Ro (m²·K/W)') }}</span>
+                <input v-model.number="form.customRoofRo" type="number" min="0.01" max="0.5" step="0.01" :placeholder="'0.04'" />
+              </label>
+            </div>
+
+            <div v-for="(layer, idx) in form.customRoofLayers" :key="'rl'+idx" class="field-grid field-layer-row">
+              <label class="field">
+                <span>{{ t('屋頂層', 'Roof Layer') }} {{ idx+1 }} — {{ t('材料', 'Material') }}</span>
+                <input v-model="layer.material" type="text" :placeholder="t('例：隔熱材', 'e.g. Insulation')" />
+              </label>
+              <label class="field">
+                <span>{{ t('厚度 d (mm)', 'Thickness d (mm)') }}</span>
+                <input v-model.number="layer.thicknessMm" type="number" min="1" max="2000" step="1" />
+              </label>
+              <label class="field">
+                <span>{{ t('導熱係數 λ (W/m·K)', 'Conductivity λ (W/m·K)') }}</span>
+                <input v-model.number="layer.lambdaWmK" type="number" min="0.001" max="100" step="0.001" />
+              </label>
+              <label class="field field--inline">
+                <span>{{ t('R_i = d/λ (m²·K/W)', 'R_i = d/λ (m²·K/W)') }}</span>
+                <span class="badge badge--calc">{{ layer.thicknessMm && layer.lambdaWmK ? ((layer.thicknessMm/1000)/layer.lambdaWmK).toFixed(4) : '—' }}</span>
+                <button type="button" class="btn-remove-layer" @click="form.customRoofLayers.splice(idx,1)">✕</button>
+              </label>
+            </div>
+            <div class="field-layer-actions">
+              <button type="button" class="calc-btn-sm" @click="form.customRoofLayers.push({material:'',thicknessMm:100,lambdaWmK:1.0})">
+                + {{ t('新增屋頂材料層', 'Add Roof Layer') }}
+              </button>
+              <span class="badge badge--calc" v-if="customRoofU !== null">
+                {{ t('計算 U 值', 'Calculated U') }} = {{ customRoofU.toFixed(4) }} W/m²·K
+              </span>
+            </div>
           </div>
 
           <div v-if="form.branchType === 'hotwater'" class="calc-subsection">
