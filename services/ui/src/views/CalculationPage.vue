@@ -557,6 +557,27 @@
 
           <div v-if="!result" class="calc-placeholder">{{ t('執行計算後即可查看輸出與完整證據軌跡。', 'Run calculation to view outputs and full evidence trace.') }}</div>
           <template v-else>
+            <div
+              v-if="result.outputs.EL_input?.EL_was_clamped"
+              class="calc-warning-banner"
+              role="alert"
+            >
+              <strong>{{ t('EL 自動調整提示', 'EL Auto-Adjusted Notice') }}</strong>
+              <p>
+                {{ t(
+                  'EL is below the minimum allowable threshold. The system has automatically applied 0.4 according to the calculation rule.',
+                  'EL is below the minimum allowable threshold. The system has automatically applied 0.4 according to the calculation rule.'
+                ) }}
+              </p>
+              <p class="calc-warning-banner__values">
+                {{ t('原始輸入 EL', 'Original EL input') }}:
+                <strong>{{ format(result.outputs.EL_input.EL_original) }}</strong>
+                &nbsp;→&nbsp;
+                {{ t('實際採用 EL', 'EL used in calculation') }}:
+                <strong>{{ format(result.outputs.EL_input.EL) }}</strong>
+              </p>
+            </div>
+
             <div class="calc-metric-grid">
               <div class="calc-metric-card"><span>AFe</span><strong>{{ format(result.outputs.AFe) }}</strong></div>
               <div class="calc-metric-card"><span>EEI</span><strong>{{ format(result.outputs.EEI) }}</strong></div>
@@ -567,6 +588,13 @@
               <div class="calc-metric-card"><span>TEUI</span><strong>{{ format(result.outputs.indicators?.TEUI) }}</strong></div>
               <div class="calc-metric-card"><span>ESR</span><strong>{{ format(result.outputs.indicators?.ESR) }}</strong></div>
             </div>
+
+            <p class="calc-precision-note">
+              {{ t(
+                '精度說明：SCOREEE 以全精度 EEI 計算（不於計算過程中四捨五入至小數第二位），畫面顯示一律取至小數第三位；完整未捨入值請見證據軌跡。',
+                'Precision policy: SCOREEE is computed from the full-precision EEI value (no rounding to 2dp during the calculation). On-screen values are rounded to 3 decimal places for display; the raw un-rounded values are recorded in the evidence trace.'
+              ) }}
+            </p>
 
             <div class="calc-output-grid">
               <div class="calc-output-card">
@@ -685,9 +713,16 @@ const bersUseCategories: BersUseCategory[] = [
   { id: 'D1_SPORTS_SPECIAL_VENUE', labelZh: 'D-1 體育專用場館', labelEn: 'D-1 Sports Special Venue', appendix1Code: 'D1', calcBuildingType: 'D1', hotwaterCategory: null, status: 'ready', table32Label: 'D-1 之體育專用場館' },
   { id: 'D2_EDUCATION_CULTURE', labelZh: 'D-2 文教設施', labelEn: 'D-2 Education / Culture', appendix1Code: 'D2', calcBuildingType: 'D2', hotwaterCategory: null, status: 'ready', table32Label: 'D-2 之文教設施' },
   { id: 'D2_SPECIAL_FUNCTION_VENUE', labelZh: 'D-2 特殊功能場館', labelEn: 'D-2 Special Function Venue', appendix1Code: 'D2', calcBuildingType: 'D2', hotwaterCategory: null, status: 'ready', table32Label: 'D-2 之特殊功能場館' },
-  { id: 'D3_D4_TEACHING_OFFICE_BUILDING', labelZh: 'D-3/D-4 教學辦公樓', labelEn: 'D-3/D-4 Teaching Office Building', appendix1Code: 'D3', calcBuildingType: 'D3', hotwaterCategory: null, status: 'ready', table32Label: 'D-3&D-4 之教學辦公公樓' },
-  { id: 'D3_TYPE_B_CLASSROOM', labelZh: 'D-3 乙教室', labelEn: 'D-3 Type B Classroom', appendix1Code: 'D3', calcBuildingType: 'D3', hotwaterCategory: null, status: 'ready', table32Label: 'D-3 乙教室' },
-  { id: 'D4_TYPE_B_CLASSROOM', labelZh: 'D-4 乙教室', labelEn: 'D-4 Type B Classroom', appendix1Code: 'D4', calcBuildingType: 'D4', hotwaterCategory: null, status: 'ready', table32Label: 'D-4 乙教室' },
+  // Building Use Group D-3/D-4 (K-12 教學設施) cross-walks to Appendix 1 Table A M-series by school level (M2 國小 / M3 國中 / M4 高中職、大專). Technical.pdf Appendix 1: M2=16/15/6, M3=21/21/8, M4=23/22/9.
+  { id: 'M2_ELEMENTARY_TEACHING_OFFICE', labelZh: 'D-3/D-4 教學辦公樓 — M-2 國小', labelEn: 'D-3/D-4 Teaching Office — M-2 Elementary', appendix1Code: 'M2', calcBuildingType: 'M2', hotwaterCategory: null, status: 'ready', table32Label: 'D-3&D-4 之教學辦公公樓' },
+  { id: 'M3_JUNIOR_HIGH_TEACHING_OFFICE', labelZh: 'D-3/D-4 教學辦公樓 — M-3 國中', labelEn: 'D-3/D-4 Teaching Office — M-3 Junior High', appendix1Code: 'M3', calcBuildingType: 'M3', hotwaterCategory: null, status: 'ready', table32Label: 'D-3&D-4 之教學辦公公樓' },
+  { id: 'M4_SENIOR_COLLEGE_TEACHING_OFFICE', labelZh: 'D-3/D-4 教學辦公樓 — M-4 高中職/大專', labelEn: 'D-3/D-4 Teaching Office — M-4 Senior/College', appendix1Code: 'M4', calcBuildingType: 'M4', hotwaterCategory: null, status: 'ready', table32Label: 'D-3&D-4 之教學辦公公樓' },
+  { id: 'M2_ELEMENTARY_D3_CLASSROOM', labelZh: 'D-3 乙教室 — M-2 國小', labelEn: 'D-3 Type B Classroom — M-2 Elementary', appendix1Code: 'M2', calcBuildingType: 'M2', hotwaterCategory: null, status: 'ready', table32Label: 'D-3 乙教室' },
+  { id: 'M3_JUNIOR_HIGH_D3_CLASSROOM', labelZh: 'D-3 乙教室 — M-3 國中', labelEn: 'D-3 Type B Classroom — M-3 Junior High', appendix1Code: 'M3', calcBuildingType: 'M3', hotwaterCategory: null, status: 'ready', table32Label: 'D-3 乙教室' },
+  { id: 'M4_SENIOR_COLLEGE_D3_CLASSROOM', labelZh: 'D-3 乙教室 — M-4 高中職/大專', labelEn: 'D-3 Type B Classroom — M-4 Senior/College', appendix1Code: 'M4', calcBuildingType: 'M4', hotwaterCategory: null, status: 'ready', table32Label: 'D-3 乙教室' },
+  { id: 'M2_ELEMENTARY_D4_CLASSROOM', labelZh: 'D-4 乙教室 — M-2 國小', labelEn: 'D-4 Type B Classroom — M-2 Elementary', appendix1Code: 'M2', calcBuildingType: 'M2', hotwaterCategory: null, status: 'ready', table32Label: 'D-4 乙教室' },
+  { id: 'M3_JUNIOR_HIGH_D4_CLASSROOM', labelZh: 'D-4 乙教室 — M-3 國中', labelEn: 'D-4 Type B Classroom — M-3 Junior High', appendix1Code: 'M3', calcBuildingType: 'M3', hotwaterCategory: null, status: 'ready', table32Label: 'D-4 乙教室' },
+  { id: 'M4_SENIOR_COLLEGE_D4_CLASSROOM', labelZh: 'D-4 乙教室 — M-4 高中職/大專', labelEn: 'D-4 Type B Classroom — M-4 Senior/College', appendix1Code: 'M4', calcBuildingType: 'M4', hotwaterCategory: null, status: 'ready', table32Label: 'D-4 乙教室' },
   { id: 'D5_AFTERSCHOOL_CARE', labelZh: 'D-5 補教課後照顧機構', labelEn: 'D-5 Afterschool Care', appendix1Code: null, calcBuildingType: 'D5', hotwaterCategory: null, status: 'pending_crosswalk', table32Label: 'D-5 補教課後照顧機構' },
   { id: 'E_RELIGION_FUNERAL', labelZh: 'E 宗教殯儀設施', labelEn: 'E Religion / Funeral Facility', appendix1Code: null, calcBuildingType: 'E', hotwaterCategory: null, status: 'pending_crosswalk', table32Label: 'E 宗教殯儀設施' },
   { id: 'F1_DAYCARE_MEDICAL_CARE', labelZh: 'F-1 醫療照護（日照）', labelEn: 'F-1 Medical Care, Daycare', appendix1Code: 'F1', calcBuildingType: 'F1', hotwaterCategory: null, status: 'ready', table32Label: 'F-1 乙醫療照護(日照)' },
@@ -1523,6 +1558,52 @@ function downloadEvidence() {
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 10px;
   margin-bottom: 16px;
+}
+
+.calc-precision-note {
+  font-size: var(--text-2xs);
+  color: #64748b;
+  margin: 0 0 16px 0;
+  padding: 8px 12px;
+  border-left: 3px solid #cde3ff;
+  background: #f6faff;
+  line-height: 1.5;
+}
+
+.calc-warning-banner {
+  margin: 0 0 16px 0;
+  padding: 12px 16px;
+  background: #fffaeb;
+  border: 1px solid #f5c66f;
+  border-left: 4px solid #d97706;
+  border-radius: 8px;
+  color: #78350f;
+  font-size: var(--text-xs);
+  line-height: 1.55;
+}
+
+.calc-warning-banner strong {
+  display: block;
+  color: #92400e;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.calc-warning-banner p {
+  margin: 0 0 4px 0;
+}
+
+.calc-warning-banner__values {
+  margin-top: 6px;
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  color: #78350f;
+}
+
+.calc-warning-banner__values strong {
+  display: inline;
+  color: #b45309;
+  font-weight: 700;
+  margin: 0;
 }
 
 .calc-metric-card {

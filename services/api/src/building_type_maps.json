@@ -143,32 +143,86 @@
       "aliases": ["D-2 之特殊功能場館"],
       "notes": null
     },
-    "D3_D4_TEACHING_OFFICE_BUILDING": {
-      "appendix1_code": "D3",
-      "appendix1_label": "D3/D4 mixed category in Table 3.2 row",
+    "M2_ELEMENTARY_TEACHING_OFFICE": {
+      "appendix1_code": "M2",
+      "appendix1_label": "M2.國小辦公室與教室",
       "table_3_2_label": "D-3&D-4 之教學辦公公樓",
       "supports_intermittent_ac": null,
       "hotwater_branch_category": null,
-      "aliases": ["D-3&D-4 之教學辦公公樓", "D-3 & D-4 之教學辦公公樓"],
-      "notes": "Select appropriate Appendix 1 code according to your project subtype; default mapping uses D3 for now."
+      "aliases": ["D-3/D-4 教學辦公樓 (國小)", "D-3&D-4 之教學辦公公樓 (國小)"],
+      "notes": "Building Use Group D-3/D-4 教學辦公樓 at elementary-school level. Appendix 1 Table A row M2: AEUI=16.0 LEUI=15.0 EEUI=6.0 (Technical.pdf line 4376)."
     },
-    "D3_TYPE_B_CLASSROOM": {
-      "appendix1_code": "D3",
-      "appendix1_label": "D3",
+    "M3_JUNIOR_HIGH_TEACHING_OFFICE": {
+      "appendix1_code": "M3",
+      "appendix1_label": "M3.國中辦公室與教室",
+      "table_3_2_label": "D-3&D-4 之教學辦公公樓",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-3/D-4 教學辦公樓 (國中)", "D-3&D-4 之教學辦公公樓 (國中)"],
+      "notes": "Building Use Group D-3/D-4 教學辦公樓 at junior-high-school level. Appendix 1 Table A row M3: AEUI=21.0 LEUI=21.0 EEUI=8.0 (Technical.pdf line 4378)."
+    },
+    "M4_SENIOR_COLLEGE_TEACHING_OFFICE": {
+      "appendix1_code": "M4",
+      "appendix1_label": "M4.高中職、大專教室辦公室與教室",
+      "table_3_2_label": "D-3&D-4 之教學辦公公樓",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-3/D-4 教學辦公樓 (高中職/大專)", "D-3&D-4 之教學辦公公樓 (高中職/大專)"],
+      "notes": "Building Use Group D-3/D-4 教學辦公樓 at senior-high or college level. Appendix 1 Table A row M4: AEUI=23.0 LEUI=22.0 EEUI=9.0 (Technical.pdf line 4382)."
+    },
+    "M2_ELEMENTARY_D3_CLASSROOM": {
+      "appendix1_code": "M2",
+      "appendix1_label": "M2.國小辦公室與教室",
       "table_3_2_label": "D-3 乙教室",
       "supports_intermittent_ac": null,
       "hotwater_branch_category": null,
-      "aliases": ["D-3 乙教室"],
-      "notes": null
+      "aliases": ["D-3 乙教室 (國小)"],
+      "notes": "Building Use Group D-3 乙教室 at elementary-school level. Appendix 1 Table A row M2 baseline; Table 3-2 row D-3 乙教室 (YOHj=1430)."
     },
-    "D4_TYPE_B_CLASSROOM": {
-      "appendix1_code": "D4",
-      "appendix1_label": "D4",
+    "M3_JUNIOR_HIGH_D3_CLASSROOM": {
+      "appendix1_code": "M3",
+      "appendix1_label": "M3.國中辦公室與教室",
+      "table_3_2_label": "D-3 乙教室",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-3 乙教室 (國中)"],
+      "notes": "Building Use Group D-3 乙教室 at junior-high-school level. Appendix 1 Table A row M3 baseline; Table 3-2 row D-3 乙教室 (YOHj=1430)."
+    },
+    "M4_SENIOR_COLLEGE_D3_CLASSROOM": {
+      "appendix1_code": "M4",
+      "appendix1_label": "M4.高中職、大專教室辦公室與教室",
+      "table_3_2_label": "D-3 乙教室",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-3 乙教室 (高中職/大專)"],
+      "notes": "Building Use Group D-3 乙教室 at senior-high or college level. Appendix 1 Table A row M4 baseline; Table 3-2 row D-3 乙教室 (YOHj=1430)."
+    },
+    "M2_ELEMENTARY_D4_CLASSROOM": {
+      "appendix1_code": "M2",
+      "appendix1_label": "M2.國小辦公室與教室",
       "table_3_2_label": "D-4 乙教室",
       "supports_intermittent_ac": null,
       "hotwater_branch_category": null,
-      "aliases": ["D-4 乙教室"],
-      "notes": null
+      "aliases": ["D-4 乙教室 (國小)"],
+      "notes": "Building Use Group D-4 乙教室 at elementary-school level. Appendix 1 Table A row M2 baseline; Table 3-2 row D-4 乙教室 (YOHj=1880)."
+    },
+    "M3_JUNIOR_HIGH_D4_CLASSROOM": {
+      "appendix1_code": "M3",
+      "appendix1_label": "M3.國中辦公室與教室",
+      "table_3_2_label": "D-4 乙教室",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-4 乙教室 (國中)"],
+      "notes": "Building Use Group D-4 乙教室 at junior-high-school level. Appendix 1 Table A row M3 baseline; Table 3-2 row D-4 乙教室 (YOHj=1880)."
+    },
+    "M4_SENIOR_COLLEGE_D4_CLASSROOM": {
+      "appendix1_code": "M4",
+      "appendix1_label": "M4.高中職、大專教室辦公室與教室",
+      "table_3_2_label": "D-4 乙教室",
+      "supports_intermittent_ac": null,
+      "hotwater_branch_category": null,
+      "aliases": ["D-4 乙教室 (高中職/大專)"],
+      "notes": "Building Use Group D-4 乙教室 at senior-high or college level. Appendix 1 Table A row M4 baseline; Table 3-2 row D-4 乙教室 (YOHj=1880)."
     },
     "D5_AFTERSCHOOL_CARE": {
       "appendix1_code": null,

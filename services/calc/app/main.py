@@ -266,6 +266,74 @@ def _require_non_negative(value: Any, field_name: str) -> float:
     return numeric
 
 
+# EL minimum-threshold constant (BERSn Manual Appendix 2 Eq. 17: "EL >= 0.4").
+# A single source of truth so every entry point applies the same rule.
+EL_MIN_THRESHOLD = 0.4
+
+
+def _clamp_el_to_minimum(raw_el: float, trace=None) -> dict:
+    """Apply the BERSn EL >= 0.4 minimum threshold and record both values.
+
+    Reviewer-confirmed policy (Carl Yu, 2026-05-21):
+      - If the supplied EL is below the 0.4 floor, the calc engine MUST
+        substitute 0.4 (the manual's hard minimum) and continue.
+      - Both the original (user-supplied) value and the clamped value MUST
+        be recorded in the trace and surfaced in the response so reviewers
+        can audit when and why a substitution happened.
+      - The UI uses the `was_clamped` flag to render a clearly-visible
+        warning to the user; this function does NOT raise.
+
+    Args:
+        raw_el: The EL value as supplied (already coerced to float, non-negative).
+        trace:  Optional TraceBuilder; when present an audit step is appended.
+
+    Returns:
+        {
+          "EL":           <effective value used downstream (>= 0.4)>,
+          "EL_original":  <the user-supplied value, verbatim>,
+          "EL_was_clamped": <True if EL_original < 0.4 else False>,
+          "EL_min_threshold": 0.4,
+          "EL_clamp_message": <UI message string, only when was_clamped>,
+        }
+    """
+    was_clamped = raw_el < EL_MIN_THRESHOLD
+    effective = EL_MIN_THRESHOLD if was_clamped else raw_el
+    message = (
+        "EL is below the minimum allowable threshold. The system has "
+        "automatically applied 0.4 according to the calculation rule."
+    )
+
+    result = {
+        "EL": effective,
+        "EL_original": raw_el,
+        "EL_was_clamped": was_clamped,
+        "EL_min_threshold": EL_MIN_THRESHOLD,
+    }
+    if was_clamped:
+        result["EL_clamp_message"] = message
+
+    if trace is not None:
+        trace.add_step(
+            description="EL minimum-threshold enforcement (Appendix 2 Eq. 17 rule: EL >= 0.4)",
+            inputs={
+                "EL_supplied": raw_el,
+                "EL_min_threshold": EL_MIN_THRESHOLD,
+            },
+            result={
+                "EL_effective": effective,
+                "EL_original": raw_el,
+                "EL_was_clamped": was_clamped,
+                "note": (
+                    message
+                    if was_clamped
+                    else "Supplied EL is within range; no substitution applied."
+                ),
+            },
+        )
+
+    return result
+
+
 def _require_list(value: Any, field_name: str) -> list:
     """Validate list shape consistently for formula endpoints."""
     if not isinstance(value, list):
@@ -388,7 +456,10 @@ def run_calc(request: CalcRequest):
         eac = _to_float(inputs.get("EAC"), "EAC")
         eev = _to_float(inputs.get("EEV"), "EEV")
         es = _to_float(inputs.get("Es"), "Es")
-        el = _to_float(inputs.get("EL"), "EL")
+        el_raw = _to_float(inputs.get("EL"), "EL")
+        el_clamp = _clamp_el_to_minimum(el_raw, trace)
+        el = el_clamp["EL"]
+        outputs["EL_input"] = el_clamp
         et = _to_float(inputs.get("Et"), "Et")
 
         # Step 1: compute evaluation floor area (Eq. 3.1).
@@ -955,12 +1026,15 @@ def run_preprocess_efficiency(request: FormulaRequest):
     # Prefer direct value; otherwise compute from Appendix-2 Eq.17 inputs when provided.
     el = None
     el_source = None
+    el_clamp_info = None
     if inputs.get("EL") is not None:
-        el = _require_non_negative(inputs.get("EL"), "EL")
+        el_raw = _require_non_negative(inputs.get("EL"), "EL")
+        el_clamp_info = _clamp_el_to_minimum(el_raw, trace)
+        el = el_clamp_info["EL"]
         el_source = "provided_directly"
         trace.add_step(
             description="Accept provided EL (3-2-2 preprocessing)",
-            inputs={"equation": "3-2-2", "EL": inputs.get("EL")},
+            inputs={"equation": "3-2-2", "EL": inputs.get("EL"), "EL_after_clamp": el},
             result=el,
         )
     else:
@@ -1005,6 +1079,8 @@ def run_preprocess_efficiency(request: FormulaRequest):
             "EL": el_source,
         },
     }
+    if el_clamp_info is not None:
+        outputs["EL_input"] = el_clamp_info
 
     return FormulaResponse(
         calc_run_id=request.calc_run_id,
@@ -1336,7 +1412,9 @@ def run_general_eei_path(request: FormulaRequest):
     eac = _require_non_negative(inputs.get("EAC"), "EAC")
     eev = _require_non_negative(inputs.get("EEV"), "EEV")
     es = _require_non_negative(inputs.get("Es"), "Es")
-    el = _require_non_negative(inputs.get("EL"), "EL")
+    el_raw = _require_non_negative(inputs.get("EL"), "EL")
+    el_clamp_info = _clamp_el_to_minimum(el_raw, trace)
+    el = el_clamp_info["EL"]
     et = _require_non_negative(inputs.get("Et"), "Et")
 
     # --- Eq. 3.1: AFe = AF - ΣAfk ---
@@ -1389,6 +1467,7 @@ def run_general_eei_path(request: FormulaRequest):
             "EL": el,
             "Et": et,
         },
+        "EL_input": el_clamp_info,
     }
 
     if exclusion_result is not None:
@@ -1419,7 +1498,9 @@ def run_eei_general_formula(request: FormulaRequest):
     eac = _require_non_negative(inputs.get("EAC"), "EAC")
     eev = _require_non_negative(inputs.get("EEV"), "EEV")
     es = _require_non_negative(inputs.get("Es"), "Es")
-    el = _require_non_negative(inputs.get("EL"), "EL")
+    el_raw = _require_non_negative(inputs.get("EL"), "EL")
+    el_clamp_info = _clamp_el_to_minimum(el_raw, trace)
+    el = el_clamp_info["EL"]
     et = _require_non_negative(inputs.get("Et"), "Et")
 
     eei = calculate_eei_bersn(a, b, c, eac, eev, es, el, et, trace)
@@ -1427,7 +1508,7 @@ def run_eei_general_formula(request: FormulaRequest):
     return FormulaResponse(
         calc_run_id=request.calc_run_id,
         formula_version=request.formula_version,
-        outputs={"EEI": eei},
+        outputs={"EEI": eei, "EL_input": el_clamp_info},
         trace=trace.build(),
     )
 
@@ -1612,6 +1693,7 @@ def run_general_full_formula(request: FormulaRequest):
     # 3-2-2 preprocessing for EEV/EAC/EL:
     # - If direct values are provided, use them.
     # - Otherwise, reuse preprocess-efficiency endpoint logic to compute from Appendix-2 inputs.
+    general_full_el_clamp_info = None
     if (
         inputs.get("EEV") is not None
         and inputs.get("EAC") is not None
@@ -1619,11 +1701,13 @@ def run_general_full_formula(request: FormulaRequest):
     ):
         eev = _require_non_negative(inputs.get("EEV"), "EEV")
         eac = _require_non_negative(inputs.get("EAC"), "EAC")
-        el = _require_non_negative(inputs.get("EL"), "EL")
+        el_raw = _require_non_negative(inputs.get("EL"), "EL")
+        general_full_el_clamp_info = _clamp_el_to_minimum(el_raw, trace)
+        el = general_full_el_clamp_info["EL"]
         trace.add_step(
             description="Use provided EEV/EAC/EL in general-full",
             inputs={"equation": "3-2-2", "mode": "provided_directly"},
-            result={"EEV": eev, "EAC": eac, "EL": el},
+            result={"EEV": eev, "EAC": eac, "EL": el, "EL_was_clamped": general_full_el_clamp_info["EL_was_clamped"]},
         )
     else:
         preprocess_resp = run_preprocess_efficiency(request)
@@ -1631,6 +1715,8 @@ def run_general_full_formula(request: FormulaRequest):
         eev = _to_float(prep_outputs.get("EEV"), "EEV")
         eac = _to_float(prep_outputs.get("EAC"), "EAC")
         el = _to_float(prep_outputs.get("EL"), "EL")
+        # Preprocess endpoint already applied the EL clamp; forward its metadata.
+        general_full_el_clamp_info = prep_outputs.get("EL_input")
         trace.add_step(
             description="Reuse /formulas/preprocess-efficiency in general-full",
             inputs={"equation": "3-2-2", "mode": "computed_or_mixed"},
@@ -1720,6 +1806,8 @@ def run_general_full_formula(request: FormulaRequest):
         "indicators": indicators,
         "grade_result": grade_result,
     }
+    if general_full_el_clamp_info is not None:
+        outputs["EL_input"] = general_full_el_clamp_info
 
     if exclusion_result is not None:
         outputs["excluded_zone_evaluation"] = exclusion_result["evaluated_zones"]
@@ -1764,6 +1852,7 @@ def run_hotwater_full_formula(request: FormulaRequest):
     ur = _require_in_range(inputs.get("UR"), "UR", 0.0, 1.0)
 
     # 3-2-2 preprocessing for EEV/EAC/EL (same as general-full behavior)
+    hotwater_full_el_clamp_info = None
     if (
         inputs.get("EEV") is not None
         and inputs.get("EAC") is not None
@@ -1771,11 +1860,13 @@ def run_hotwater_full_formula(request: FormulaRequest):
     ):
         eev = _require_non_negative(inputs.get("EEV"), "EEV")
         eac = _require_non_negative(inputs.get("EAC"), "EAC")
-        el = _require_non_negative(inputs.get("EL"), "EL")
+        el_raw = _require_non_negative(inputs.get("EL"), "EL")
+        hotwater_full_el_clamp_info = _clamp_el_to_minimum(el_raw, trace)
+        el = hotwater_full_el_clamp_info["EL"]
         trace.add_step(
             description="Use provided EEV/EAC/EL in hotwater-full",
             inputs={"equation": "3-2-2", "mode": "provided_directly"},
-            result={"EEV": eev, "EAC": eac, "EL": el},
+            result={"EEV": eev, "EAC": eac, "EL": el, "EL_was_clamped": hotwater_full_el_clamp_info["EL_was_clamped"]},
         )
     else:
         preprocess_resp = run_preprocess_efficiency(request)
@@ -1783,6 +1874,8 @@ def run_hotwater_full_formula(request: FormulaRequest):
         eev = _to_float(prep_outputs.get("EEV"), "EEV")
         eac = _to_float(prep_outputs.get("EAC"), "EAC")
         el = _to_float(prep_outputs.get("EL"), "EL")
+        # Preprocess endpoint already applied the EL clamp; forward its metadata.
+        hotwater_full_el_clamp_info = prep_outputs.get("EL_input")
         trace.add_step(
             description="Reuse /formulas/preprocess-efficiency in hotwater-full",
             inputs={"equation": "3-2-2", "mode": "computed_or_mixed"},
@@ -1901,6 +1994,8 @@ def run_hotwater_full_formula(request: FormulaRequest):
         "indicators": indicators,
         "grade_result": grade_result,
     }
+    if hotwater_full_el_clamp_info is not None:
+        outputs["EL_input"] = hotwater_full_el_clamp_info
 
     if exclusion_result is not None:
         outputs["excluded_zone_evaluation"] = exclusion_result["evaluated_zones"]

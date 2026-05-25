@@ -185,7 +185,7 @@
       "full_year_ac": {
         "AEUI": 117.9,
         "LEUI": 47.2,
-        "EEUI": 31.4
+        "EEUI": 41.4
       },
       "intermittent_ac": null,
       "UR": {
@@ -345,34 +345,34 @@
       }
     },
     "H7": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 47.5,
         "LEUI": 28.6,
         "EEUI": 19.0
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0
       }
     },
     "H8": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 41.6,
         "LEUI": 25.0,
         "EEUI": 16.7
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0
       }
     },
     "H9": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 34.6,
         "LEUI": 20.6,
         "EEUI": 13.8
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0
       }
@@ -513,7 +513,10 @@
       },
       "intermittent_ac": null,
       "UR": {
-        "A": 1.0
+        "A": 1.0,
+        "B": 0.95,
+        "C": 0.8,
+        "D": 0.7
       }
     },
     "K2": {
@@ -655,12 +658,12 @@
       }
     },
     "L4": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 114.9,
         "LEUI": 37.6,
         "EEUI": 25.0
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 0.95,
@@ -669,12 +672,12 @@
       }
     },
     "L5": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 82.1,
         "LEUI": 37.6,
         "EEUI": 25.0
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 0.95,
@@ -715,12 +718,12 @@
       }
     },
     "M2": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 16.0,
         "LEUI": 15.0,
         "EEUI": 6.0
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 0.95,
@@ -729,12 +732,12 @@
       }
     },
     "M3": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 21.0,
         "LEUI": 21.0,
         "EEUI": 8.0
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 0.95,
@@ -743,12 +746,12 @@
       }
     },
     "M4": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 23.0,
         "LEUI": 22.0,
         "EEUI": 9.0
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 0.95,
@@ -787,12 +790,12 @@
       "notes": "Use L1 baseline per table."
     },
     "N1": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 34.3,
         "LEUI": 40.1,
         "EEUI": 12.4
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 0.95,
@@ -801,12 +804,12 @@
       }
     },
     "N2": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 50.4,
         "LEUI": 40.1,
         "EEUI": 12.4
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 0.95,
@@ -815,12 +818,12 @@
       }
     },
     "O1": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 0.0,
         "LEUI": 131.0,
         "EEUI": 95.0
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 1.0,
@@ -829,12 +832,12 @@
       }
     },
     "O2": {
-      "full_year_ac": {
+      "full_year_ac": null,
+      "intermittent_ac": {
         "AEUI": 0.0,
         "LEUI": 47.0,
         "EEUI": 31.0
       },
-      "intermittent_ac": null,
       "UR": {
         "A": 1.0,
         "B": 1.0,
